@@ -1,0 +1,51 @@
+version: "2"
+vars:
+  ARGS: ""
+  os:
+    sh: go env GOOS
+  arch:
+    sh: go env GOARCH
+  kbversion: 2.2.0
+  kbdir: ./.kubebuilder
+
+env:
+  KUBEBUILDER_ASSETS: "{{.kbdir}}/bin"
+
+tasks:
+  test:
+    deps:
+      - kubebuilder
+    cmds:
+      - go test -cover -coverprofile coverage.txt ./...
+    generates:
+      - coverage.txt
+    sources:
+      - ./**/*.go
+
+  build:
+    cmds:
+      - go build -o pomerium-operator cmd/pomerium-operator/*.go
+    generates:
+      - pomerium-operator
+    sources:
+      - ./**/*.go
+      - ./go.mod
+      - ./go.sum
+
+  run:
+    cmds:
+      - go run cmd/pomerium-operator/*.go --debug "{{.ARGS}}"
+
+  kubebuilder:
+    cmds:
+      - curl -L https://go.kubebuilder.io/dl/{{.kbversion}}/{{.os}}/{{.arch}} | tar -xz -C /tmp/
+      - mv /tmp/kubebuilder_{{.kbversion}}_{{.os}}_{{.arch}} .kubebuilder
+    status:
+      - test -d "{{.kbdir}}/bin"
+    generates:
+      - "{{.kbdir}}/bin/*"
+
+  clean:
+    cmds:
+      - rm -rf .kubebuilder
+      - rm -f pomerium-operator
