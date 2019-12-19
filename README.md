@@ -1,6 +1,7 @@
 - [About](#about)
   - [Initial discussion](#initial-discussion)
 - [Installing](#installing)
+- [Building](#building)
 - [Spec](#spec)
   - [Annotations](#annotations)
 - [Roadmap (tentative)](#roadmap-tentative)
@@ -16,6 +17,11 @@ https://github.com/pomerium/pomerium/issues/425
 
 # Installing
 TBD helm chart integration
+
+# Building
+pomerium-operator utilizes [go-task](https://taskfile.dev/#/) for development related tasks.  
+
+`task build`
 
 # Spec
 
