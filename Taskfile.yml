@@ -13,6 +13,7 @@ env:
 
 tasks:
   test:
+    desc: Run full test suite
     deps:
       - kubebuilder
     cmds:
@@ -23,6 +24,7 @@ tasks:
       - ./**/*.go
 
   build:
+    desc: Build binary
     cmds:
       - go build -o pomerium-operator cmd/pomerium-operator/*.go
     generates:
@@ -33,10 +35,12 @@ tasks:
       - ./go.sum
 
   run:
+    desc: Run in debug mode with $ARGS as arguments
     cmds:
       - go run cmd/pomerium-operator/*.go --debug "{{.ARGS}}"
 
   kubebuilder:
+    desc: Install kubebuilder for testing
     cmds:
       - curl -L https://go.kubebuilder.io/dl/{{.kbversion}}/{{.os}}/{{.arch}} | tar -xz -C /tmp/
       - mv /tmp/kubebuilder_{{.kbversion}}_{{.os}}_{{.arch}} .kubebuilder
@@ -46,6 +50,7 @@ tasks:
       - "{{.kbdir}}/bin/*"
 
   clean:
+    desc: Clean binary and kubebuilder
     cmds:
       - rm -rf .kubebuilder
       - rm -f pomerium-operator
