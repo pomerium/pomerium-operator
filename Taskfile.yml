@@ -60,3 +60,4 @@ tasks:
     cmds:
       - rm -rf .kubebuilder
       - rm -f pomerium-operator
+      - rm -f coverage.txt
