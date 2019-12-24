@@ -84,9 +84,10 @@ func Test_Reconcile(t *testing.T) {
 			c := fake.NewFakeClient(o...)
 			r := NewReconciler(tt.reconcilerType, "pomerium", configmanager.NewConfigManager("test", "test", c, time.Nanosecond*1))
 
-			r.InjectClient(c)
+			err := r.InjectClient(c)
+			assert.NoError(t, err, "failed to inject client")
 
-			_, err := r.Reconcile(tt.reconcileRequest)
+			_, err = r.Reconcile(tt.reconcileRequest)
 			assert.NoError(t, err)
 			// assert.True(t, false)
 
@@ -205,7 +206,9 @@ func Test_Reconcile_2(t *testing.T) {
 			c := fake.NewFakeClient(&testConfigMap)
 			cm := configmanager.NewConfigManager("test", "test", c, time.Nanosecond*1)
 			r := NewReconciler(tt.obj, "pomerium", cm)
-			r.InjectClient(c)
+			err := r.InjectClient(c)
+			assert.NoError(t, err, "failed to inject client")
+
 			rec := &Reconciler{}
 			wantPolicies, err := rec.policyFromObj(tt.obj)
 			assert.NoError(t, err)
@@ -213,25 +216,30 @@ func Test_Reconcile_2(t *testing.T) {
 			// Reconcile without object
 			_, err = r.Reconcile(reconcile.Request{NamespacedName: objNameSpacedName})
 			assert.NoError(t, err)
-			cm.Save()
+			err = cm.Save()
+			assert.NoError(t, err, "failed to save config")
 			savedOpts, err := cm.GetCurrentConfig()
 			assert.NoError(t, err)
 			assert.Empty(t, savedOpts.Policies)
 
 			// Reconcile with object
-			c.Create(context.Background(), tt.obj)
+			err = c.Create(context.Background(), tt.obj)
+			assert.NoError(t, err, "failed to create object")
 			_, err = r.Reconcile(reconcile.Request{NamespacedName: objNameSpacedName})
 			assert.NoError(t, err)
-			cm.Save()
+			err = cm.Save()
+			assert.NoError(t, err, "failed to save config")
 			savedOpts, err = cm.GetCurrentConfig()
 			assert.NoError(t, err)
 			assert.Subset(t, savedOpts.Policies, wantPolicies)
 
 			// Reconcile a delete
-			c.Delete(context.Background(), tt.obj)
+			err = c.Delete(context.Background(), tt.obj)
+			assert.NoError(t, err, "failed to delete object")
 			_, err = r.Reconcile(reconcile.Request{NamespacedName: objNameSpacedName})
 			assert.NoError(t, err)
-			cm.Save()
+			err = cm.Save()
+			assert.NoError(t, err, "failed to save config")
 			savedOpts, err = cm.GetCurrentConfig()
 			assert.NoError(t, err)
 			assert.Empty(t, savedOpts.Policies)

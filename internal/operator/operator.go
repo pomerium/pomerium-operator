@@ -7,13 +7,13 @@ import (
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
+	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	"sigs.k8s.io/controller-runtime/pkg/runtime/signals"
 )
 
 var logger = log.L.WithValues("component", "operator")
 
-type OperatorOptions struct {
+type Options struct {
 	NameSpace               string
 	ServiceClass            string
 	IngressClass            string
@@ -29,13 +29,13 @@ type OperatorOptions struct {
 }
 
 type Operator struct {
-	opts    OperatorOptions
+	opts    Options
 	mgr     manager.Manager
 	builder *builder.Builder
 	stopCh  <-chan struct{}
 }
 
-func NewOperator(opts OperatorOptions) (*Operator, error) {
+func NewOperator(opts Options) (*Operator, error) {
 
 	mgrOptions := manager.Options{
 		Namespace:               opts.NameSpace,

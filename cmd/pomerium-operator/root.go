@@ -85,7 +85,11 @@ var rootCmd = &cobra.Command{
 }
 
 func main() {
-	viper.BindPFlags(rootCmd.PersistentFlags())
+	err := viper.BindPFlags(rootCmd.PersistentFlags())
+	if err != nil {
+		fmt.Println(fmt.Errorf("failed to bind pflags: %w", err))
+		os.Exit(1)
+	}
 	viper.AutomaticEnv()
 
 	if err := rootCmd.Execute(); err != nil {
@@ -165,7 +169,7 @@ func serviceController(o *operator.Operator, cm *configmanager.ConfigManager) (e
 
 func createOperator(kcfg *rest.Config) (*operator.Operator, error) {
 	o, err := operator.NewOperator(
-		operator.OperatorOptions{
+		operator.Options{
 			KubeConfig:         kcfg,
 			NameSpace:          namespace,
 			ServiceClass:       serviceClass,

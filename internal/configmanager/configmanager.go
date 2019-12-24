@@ -77,7 +77,6 @@ func (c *ConfigManager) Save() error {
 
 	tmpOptions, err := c.GetCurrentConfig()
 	if err != nil {
-		logger.Error(err, "could not render current config")
 		return fmt.Errorf("could not render current config: %w", err)
 	}
 
@@ -90,7 +89,6 @@ func (c *ConfigManager) Save() error {
 
 	configBytes, err := yaml.Marshal(tmpOptions)
 	if err != nil {
-		logger.Error(err, "could not serialize config")
 		return fmt.Errorf("could not serialize config: %w", err)
 	}
 
@@ -100,8 +98,7 @@ func (c *ConfigManager) Save() error {
 	// TODO use context from save?
 	err = c.client.Update(context.Background(), configObj)
 	if err != nil {
-		logger.Error(err, "failed to update configmap", "configmap", c.configMap)
-		return err
+		return fmt.Errorf("failed to update configmap: %w", err)
 	}
 
 	logger.Info("successfully saved ConfigMap")
@@ -170,7 +167,10 @@ func (c *ConfigManager) saveLoop() {
 	for {
 		_, ok := <-c.settleTicker.C
 		if c.pendingSave {
-			c.Save()
+			err := c.Save()
+			if err != nil {
+				log.L.Error(err, "failed to save to configmap", "configmap", c.configMap)
+			}
 		}
 		if !ok {
 			break

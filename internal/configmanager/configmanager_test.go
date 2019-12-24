@@ -63,7 +63,9 @@ func newIngressResourceIdentifier(name string) ResourceIdentifier {
 func Test_getBaseConfig(t *testing.T) {
 	c := newMockClient(t)
 	cm := NewConfigManager("test", "pomerium", c, time.Nanosecond*1)
-	cm.SetBaseConfig(mockBaseConfigBytes(t))
+	err := cm.SetBaseConfig(mockBaseConfigBytes(t))
+	assert.NoError(t, err, "could not set base config")
+
 	opt, err := cm.getBaseConfig()
 
 	assert.Empty(t, cmp.Diff(
@@ -143,7 +145,8 @@ func Test_Save(t *testing.T) {
 	client := newMockClient(t)
 	t.Parallel()
 	cm := NewConfigManager("test", "pomerium", client, time.Nanosecond*1)
-	cm.SetBaseConfig(mockBaseConfigBytes(t))
+	err := cm.SetBaseConfig(mockBaseConfigBytes(t))
+	assert.NoError(t, err, "could not set base config")
 
 	for _, tt := range set {
 		t.Run(tt.name, func(t *testing.T) {
@@ -163,7 +166,7 @@ func Test_Save(t *testing.T) {
 	}
 
 	configMap := &corev1.ConfigMap{}
-	err := client.Get(context.Background(), types.NamespacedName{Name: cm.configMap, Namespace: cm.namespace}, configMap)
+	err = client.Get(context.Background(), types.NamespacedName{Name: cm.configMap, Namespace: cm.namespace}, configMap)
 	assert.NoError(t, err, "failed to get configMap")
 
 	resultOptions := pomeriumconfig.Options{}

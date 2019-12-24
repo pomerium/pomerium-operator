@@ -10,7 +10,6 @@ import (
 var L logr.Logger
 var level zap.AtomicLevel = zap.NewAtomicLevel()
 var z *zap.Logger
-var config zap.Config = zap.NewProductionConfig()
 
 func init() {
 	level.SetLevel(zap.InfoLevel)
