@@ -12,6 +12,12 @@ env:
   KUBEBUILDER_ASSETS: "{{.kbdir}}/bin"
 
 tasks:
+  lint:
+    cmds:
+      - golangci-lint run
+    sources:
+      - ./**/*.go
+
   test:
     desc: Run full test suite
     deps:
@@ -54,3 +60,4 @@ tasks:
     cmds:
       - rm -rf .kubebuilder
       - rm -f pomerium-operator
+      - rm -f coverage.txt

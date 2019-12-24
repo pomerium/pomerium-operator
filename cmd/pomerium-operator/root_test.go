@@ -96,6 +96,36 @@ func Test_newConfigManager(t *testing.T) {
 }
 
 func Test_getConfig(t *testing.T) {
+
+	kcfgFile, err := ioutil.TempFile("", "pomerium-operator_test-kube-config.yaml")
+	if !assert.NoError(t, err) {
+		assert.FailNow(t, "could not generate temp file: %w", err)
+	}
+
+	defer os.Remove(kcfgFile.Name())
+	defer os.Unsetenv("KUBECONFIG")
+	os.Setenv("KUBECONFIG", kcfgFile.Name())
+
+	_, err = getConfig()
+	assert.Error(t, err)
+
+	var emptyConfig = `
+apiVersion: v1
+clusters:
+- cluster:
+    server: https://1.2.3.4
+  name: test
+contexts:
+- context:
+    cluster: test
+    user: ""
+  name: test
+current-context: test
+kind: Config
+preferences: {}
+users: []`
+
+	kcfgFile.WriteString(emptyConfig)
 	kcfg, err := getConfig()
 	assert.NoError(t, err)
 	assert.NotNil(t, kcfg)
