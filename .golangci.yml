@@ -1,0 +1,8 @@
+run:
+  timeout: 2m
+linters:
+  enable:
+    - gosec
+    - gocognit
+    - goimports
+    - misspell
