@@ -25,7 +25,7 @@ func newTestEnv(t *testing.T) *envtest.Environment {
 
 func Test_main_setup(t *testing.T) {
 	testEnv := newTestEnv(t)
-	defer testEnv.Stop()
+	defer testEnv.Stop() //nolint:errcheck
 	testCfg := testEnv.Config
 
 	o, err := createOperator(testCfg)
@@ -34,14 +34,17 @@ func Test_main_setup(t *testing.T) {
 	assert.NotNil(t, o)
 
 	cm, _ := newConfigManager(testCfg)
-	serviceController(o, cm)
-	ingressController(o, cm)
+	err = serviceController(o, cm)
+	assert.NoError(t, err, "could not create service controller")
+
+	err = ingressController(o, cm)
+	assert.NoError(t, err, "could not create ingress controller")
 
 }
 
 func Test_newConfigManager(t *testing.T) {
 	testEnv := newTestEnv(t)
-	defer testEnv.Stop()
+	defer testEnv.Stop() //nolint: errcheck
 
 	tests := []struct {
 		name       string
@@ -74,8 +77,13 @@ func Test_newConfigManager(t *testing.T) {
 			defer os.Remove(tmpBaseConfigFile.Name())
 
 			if tt.baseConfig != nil {
-				tmpBaseConfigFile.Write(tt.baseConfig)
-				tmpBaseConfigFile.Sync()
+
+				_, err := tmpBaseConfigFile.Write(tt.baseConfig)
+				assert.NoError(t, err, "could not create base configuration file")
+
+				err = tmpBaseConfigFile.Close()
+				assert.NoError(t, err, "could not close base configuration file")
+
 				baseConfigFile = tmpBaseConfigFile.Name()
 			}
 
@@ -125,7 +133,8 @@ kind: Config
 preferences: {}
 users: []`
 
-	kcfgFile.WriteString(emptyConfig)
+	_, err = kcfgFile.WriteString(emptyConfig)
+	assert.NoError(t, err, "could not write out kube config file")
 	kcfg, err := getConfig()
 	assert.NoError(t, err)
 	assert.NotNil(t, kcfg)
