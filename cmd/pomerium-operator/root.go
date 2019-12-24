@@ -169,7 +169,7 @@ func serviceController(o *operator.Operator, cm *configmanager.ConfigManager) (e
 
 func createOperator(kcfg *rest.Config) (*operator.Operator, error) {
 	o, err := operator.NewOperator(
-		operator.OperatorOptions{
+		operator.Options{
 			KubeConfig:         kcfg,
 			NameSpace:          namespace,
 			ServiceClass:       serviceClass,

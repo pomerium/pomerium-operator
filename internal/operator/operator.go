@@ -13,7 +13,7 @@ import (
 
 var logger = log.L.WithValues("component", "operator")
 
-type OperatorOptions struct {
+type Options struct {
 	NameSpace               string
 	ServiceClass            string
 	IngressClass            string
@@ -29,13 +29,13 @@ type OperatorOptions struct {
 }
 
 type Operator struct {
-	opts    OperatorOptions
+	opts    Options
 	mgr     manager.Manager
 	builder *builder.Builder
 	stopCh  <-chan struct{}
 }
 
-func NewOperator(opts OperatorOptions) (*Operator, error) {
+func NewOperator(opts Options) (*Operator, error) {
 
 	mgrOptions := manager.Options{
 		Namespace:               opts.NameSpace,

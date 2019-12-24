@@ -34,7 +34,7 @@ func (f *fakeReconciler) Reconcile(req reconcile.Request) (reconcile.Result, err
 
 func Test_NewOperator(t *testing.T) {
 
-	o, err := NewOperator(OperatorOptions{
+	o, err := NewOperator(Options{
 		NameSpace:          "test",
 		Client:             newFakeClient,
 		KubeConfig:         &rest.Config{},
@@ -48,7 +48,7 @@ func Test_NewOperator(t *testing.T) {
 	assert.Equal(t, "test", o.opts.NameSpace)
 	assert.NoError(t, o.mgr.GetClient().List(context.Background(), &corev1.ServiceList{}))
 
-	_, err = NewOperator(OperatorOptions{
+	_, err = NewOperator(Options{
 		NameSpace: "test",
 		Client:    newFakeClient,
 	})
@@ -57,7 +57,7 @@ func Test_NewOperator(t *testing.T) {
 
 func Test_CreateController(t *testing.T) {
 
-	o, err := NewOperator(OperatorOptions{
+	o, err := NewOperator(Options{
 		NameSpace:          "test",
 		Client:             newFakeClient,
 		KubeConfig:         &rest.Config{},
@@ -88,7 +88,7 @@ func Test_CreateController(t *testing.T) {
 func Test_StartController(t *testing.T) {
 
 	stopCh := make(chan struct{})
-	o, err := NewOperator(OperatorOptions{
+	o, err := NewOperator(Options{
 		NameSpace:          "test",
 		Client:             newFakeClient,
 		KubeConfig:         &rest.Config{},

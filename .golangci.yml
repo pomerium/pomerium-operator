@@ -3,6 +3,7 @@ run:
 linters:
   enable:
     - gosec
+    - golint
     - gocognit
     - goimports
     - misspell
