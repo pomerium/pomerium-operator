@@ -6,3 +6,4 @@ linters:
     - gocognit
     - goimports
     - misspell
+    - gocritic
