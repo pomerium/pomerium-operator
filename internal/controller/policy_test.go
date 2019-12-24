@@ -187,7 +187,8 @@ func Test_policyFromObj(t *testing.T) {
 			obj := test.obj()
 			client := fake.NewFakeClient(test.fakeObjs...)
 			rec := &Reconciler{}
-			rec.InjectClient(client)
+			err := rec.InjectClient(client)
+			assert.NoError(t, err, "failed to inject client")
 			policy, err := rec.policyFromObj(obj)
 			if test.wantErr {
 				assert.Error(t, err)

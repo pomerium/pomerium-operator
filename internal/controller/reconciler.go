@@ -93,7 +93,10 @@ func (r *Reconciler) UpsertRoute(resource configmanager.ResourceIdentifier, obj 
 
 func (r *Reconciler) RemoveRoute(resource configmanager.ResourceIdentifier) {
 	logger.V(1).Info("removing resource", "resource", resource)
-	r.configManager.Remove(resource)
+	err := r.configManager.Remove(resource)
+	if err != nil {
+		logger.Error(err, "could not remove resource from configuration", "resource", resource)
+	}
 }
 
 func (r *Reconciler) newKind() runtime.Object {
