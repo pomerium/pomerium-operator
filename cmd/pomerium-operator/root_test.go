@@ -106,7 +106,7 @@ func Test_getConfig(t *testing.T) {
 	defer os.Unsetenv("KUBECONFIG")
 	os.Setenv("KUBECONFIG", kcfgFile.Name())
 
-	kcfg, err := getConfig()
+	_, err = getConfig()
 	assert.Error(t, err)
 
 	var emptyConfig = `
@@ -126,7 +126,7 @@ preferences: {}
 users: []`
 
 	kcfgFile.WriteString(emptyConfig)
-	kcfg, err = getConfig()
+	kcfg, err := getConfig()
 	assert.NoError(t, err)
 	assert.NotNil(t, kcfg)
 }

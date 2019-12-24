@@ -2,7 +2,10 @@ name: Default
 on:
   push:
     branches:
-      - actions
+      - master
+  pull_request:
+    branches:
+      - master
 
 jobs:
   test:
@@ -22,6 +25,13 @@ jobs:
       - name: Lint
         uses: matoous/golangci-lint-action@v1.0.0
 
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: "golang1.13"
+    needs:
+      - test
+    steps:
       - name: Build
         run: ./bin/task build
 
