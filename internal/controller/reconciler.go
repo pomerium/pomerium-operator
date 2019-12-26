@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/travisgroth/pomerium-operator/internal/configmanager"
+	"github.com/pomerium/pomerium-operator/internal/configmanager"
 
 	"k8s.io/client-go/kubernetes/scheme"
 
@@ -14,7 +14,7 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/travisgroth/pomerium-operator/internal/log"
+	"github.com/pomerium/pomerium-operator/internal/log"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
