@@ -11,7 +11,7 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 
-	"github.com/travisgroth/pomerium-operator/internal/log"
+	"github.com/pomerium/pomerium-operator/internal/log"
 
 	pomeriumconfig "github.com/pomerium/pomerium/config"
 	"sigs.k8s.io/controller-runtime/pkg/client"

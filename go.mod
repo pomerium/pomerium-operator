@@ -1,4 +1,4 @@
-module github.com/travisgroth/pomerium-operator
+module github.com/pomerium/pomerium-operator
 
 go 1.13
 

@@ -19,7 +19,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/travisgroth/pomerium-operator/internal/configmanager"
+	"github.com/pomerium/pomerium-operator/internal/configmanager"
 )
 
 func Test_NewReconciler(t *testing.T) {

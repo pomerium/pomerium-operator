@@ -6,21 +6,21 @@ import (
 	"os"
 	"time"
 
-	"github.com/travisgroth/pomerium-operator/internal/operator"
+	"github.com/pomerium/pomerium-operator/internal/operator"
 
-	"github.com/travisgroth/pomerium-operator/internal/configmanager"
+	"github.com/pomerium/pomerium-operator/internal/configmanager"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	corev1 "k8s.io/api/core/v1"
 
-	"github.com/travisgroth/pomerium-operator/internal/controller"
+	"github.com/pomerium/pomerium-operator/internal/controller"
 
 	extensionsv1beta1 "k8s.io/api/extensions/v1beta1"
 
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 
-	"github.com/travisgroth/pomerium-operator/internal/log"
+	"github.com/pomerium/pomerium-operator/internal/log"
 
 	"github.com/spf13/viper"
 

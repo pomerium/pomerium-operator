@@ -11,7 +11,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 
 	gyaml "github.com/ghodss/yaml"
-	"github.com/travisgroth/pomerium-operator/internal/configmanager"
+	"github.com/pomerium/pomerium-operator/internal/configmanager"
 	yaml "gopkg.in/yaml.v2"
 
 	corev1 "k8s.io/api/core/v1"
