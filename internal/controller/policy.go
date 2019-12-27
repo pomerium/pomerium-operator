@@ -133,6 +133,7 @@ func (r *Reconciler) policyHostnamesFromObj(obj runtime.Object, scheme string) (
 	return policies, nil
 }
 
+// backendToURL converts an IngressBackend for a given namespace into a url.URL
 func (r *Reconciler) backendToURL(backend networkingv1beta1.IngressBackend, namespace string) (serviceDNS url.URL, err error) {
 
 	var portNum int32
@@ -153,6 +154,7 @@ func (r *Reconciler) backendToURL(backend networkingv1beta1.IngressBackend, name
 	return serviceDNS, nil
 }
 
+// portFromService translates a string based port on a Service into a numeric port
 func (r *Reconciler) portFromService(service types.NamespacedName, port string) (int32, error) {
 	serviceObj := &corev1.Service{}
 	if err := r.Get(context.Background(), service, serviceObj); err != nil {

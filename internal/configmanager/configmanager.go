@@ -21,6 +21,12 @@ var logger = log.L.WithValues("component", "configmanager")
 
 const configKey = "config.yaml"
 
+// ConfigManager tracks policy groups related to a given ResourceIdentifier and handles update to a Pomerium ConfigMap via the API server
+//
+// ConfigManager accepts a baseConfig which will be merged into the persisted configuration
+//
+// Configuration can be persisted at intervals or on-demand.  Set() and Remove() operations are stored in memory only until a Save() or Start() loop
+// persist the configuration.
 type ConfigManager struct {
 	namespace    string
 	configMap    string
@@ -32,6 +38,8 @@ type ConfigManager struct {
 	pendingSave  bool
 }
 
+// NewConfigManager returns a ConfigManager which uses client to update configMap in namespace at settlePeriod interval if
+// running the save loop via Start()
 func NewConfigManager(namespace string, configMap string, client client.Client, settlePeriod time.Duration) *ConfigManager {
 	return &ConfigManager{
 		namespace:    namespace,
@@ -42,6 +50,7 @@ func NewConfigManager(namespace string, configMap string, client client.Client, 
 	}
 }
 
+// Set Adds or replaces the list of policies associated with a given ResourceIdentifier id
 func (c *ConfigManager) Set(id ResourceIdentifier, policy []pomeriumconfig.Policy) {
 	logger.V(1).Info("setting policy for resource", "id", id)
 
@@ -53,6 +62,7 @@ func (c *ConfigManager) Set(id ResourceIdentifier, policy []pomeriumconfig.Polic
 	c.pendingSave = true
 }
 
+// Remove Deletes the list of policies associated with a given ResourceIdentifier id
 func (c *ConfigManager) Remove(id ResourceIdentifier) error {
 	logger.V(1).Info("removing policy for resource", "id", id)
 
@@ -70,6 +80,7 @@ func (c *ConfigManager) Remove(id ResourceIdentifier) error {
 	return nil
 }
 
+// Save immediately flushes the current configuration to the API server
 func (c *ConfigManager) Save() error {
 	logger.V(1).Info("saving ConfigMap")
 
@@ -106,6 +117,8 @@ func (c *ConfigManager) Save() error {
 	return nil
 }
 
+// SetBaseConfig Allows arbitrary Pomerium configuration to be set with the resource based policies being saved.  This allows the user to
+// still set all Pomerium options in a config file, even though it is being managed by ConfigManager.
 func (c *ConfigManager) SetBaseConfig(configBytes []byte) error {
 	err := yaml.Unmarshal(configBytes, &pomeriumconfig.Options{})
 	if err != nil {
@@ -123,6 +136,7 @@ func (c *ConfigManager) getBaseConfig() (options pomeriumconfig.Options, err err
 	return
 }
 
+// GetCurrentConfig retrieves the current in-memory configuration from ConfigManager
 func (c *ConfigManager) GetCurrentConfig() (options pomeriumconfig.Options, err error) {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
@@ -142,6 +156,7 @@ func (c *ConfigManager) GetCurrentConfig() (options pomeriumconfig.Options, err 
 	return
 }
 
+// GetPersistedConfig retrieves the currently persisted config from the API server
 func (c *ConfigManager) GetPersistedConfig() (options pomeriumconfig.Options, err error) {
 	configObj := &corev1.ConfigMap{}
 	if err = c.client.Get(context.Background(), types.NamespacedName{Name: c.configMap, Namespace: c.namespace}, configObj); err != nil {
@@ -155,10 +170,12 @@ func (c *ConfigManager) GetPersistedConfig() (options pomeriumconfig.Options, er
 	return
 }
 
+// Start begins the periodic save loop to persist in-memory configuration to the API
 func (c *ConfigManager) Start() {
 	c.saveLoop()
 }
 
+// Stop terminates the periodic save loop
 func (c *ConfigManager) Stop() {
 	c.settleTicker.Stop()
 }

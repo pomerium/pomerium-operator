@@ -13,6 +13,7 @@ import (
 
 var logger = log.L.WithValues("component", "operator")
 
+// Options represents the configuration of an Operator.  Used in NewOperator()
 type Options struct {
 	NameSpace               string
 	ServiceClass            string
@@ -28,6 +29,9 @@ type Options struct {
 	StopCh                  <-chan struct{}
 }
 
+// Operator is the high level wrapper around a manager and the group of controllers that represents the primary functionality of pomerium-operator.  Use NewOperator() to initialize.
+//
+// Operator supports multiple Controller/Reconciler instances to allow for multiple object type recinciliation under a single controller-manager.
 type Operator struct {
 	opts    Options
 	mgr     manager.Manager
@@ -35,6 +39,9 @@ type Operator struct {
 	stopCh  <-chan struct{}
 }
 
+// NewOperator returns a new instance of an Operator, configured according to an Options struct.  The operator will have an initialized but empty Manager with no controllers.
+//
+// You must call Start() on the returned Operator to begin event loops.
 func NewOperator(opts Options) (*Operator, error) {
 
 	mgrOptions := manager.Options{
@@ -61,6 +68,7 @@ func NewOperator(opts Options) (*Operator, error) {
 	return &operator, nil
 }
 
+// Start calls Start() on the underlying controller-manager.  This begins the event handling loops on the controllers associated with the Operator instance.
 func (o *Operator) Start() error {
 	logger.Info("starting manager")
 
@@ -82,6 +90,7 @@ func (o *Operator) Start() error {
 	return nil
 }
 
+// CreateController registers a new Reconciler with the Operator and associates it with an object type to handle events for.
 func (o *Operator) CreateController(reconciler reconcile.Reconciler, name string, object runtime.Object) error {
 	log.L.V(1).Info("adding controller", "name", name, "kind", object.GetObjectKind().GroupVersionKind().Kind)
 	err := o.builder.For(object).Named(name).Complete(reconciler)
