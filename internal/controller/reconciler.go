@@ -55,11 +55,13 @@ func NewReconciler(obj runtime.Object, controllerClass string, configManager *co
 	return r
 }
 
+// InjectClient implements the Reconciler interface and accepts a new initialized client to be used by the reconciler internally
 func (r *Reconciler) InjectClient(c client.Client) error {
 	r.Client = c
 	return nil
 }
 
+// Reconcile implements the Reconciler interface and conducts a reconcile loop on a given request.  This is typically called by a controller-manager like that found inside an Operator.
 func (r *Reconciler) Reconcile(req reconcile.Request) (reconcile.Result, error) {
 	logger.V(1).Info("notified of change to resource", "resource", req.NamespacedName)
 
@@ -81,6 +83,7 @@ func (r *Reconciler) Reconcile(req reconcile.Request) (reconcile.Result, error) 
 	return reconcile.Result{}, nil
 }
 
+// UpsertRoute adds or updates a route entry into the ConfigManager associated with this Reconciler.  It will only do so if the controllerClass matches.
 func (r *Reconciler) UpsertRoute(resource configmanager.ResourceIdentifier, obj runtime.Object) {
 	if !r.ControllerClassMatch(obj.(metav1.Object)) {
 		logger.V(1).Info("resource does not match controller annotation", "resource", resource)
@@ -97,6 +100,9 @@ func (r *Reconciler) UpsertRoute(resource configmanager.ResourceIdentifier, obj 
 	r.configManager.Set(resource, policy)
 }
 
+// RemoveRoute removes a route entry from the ConfigManager associated with this Reconciler, if it currently exists.
+//
+// It is not an error to remove a route which is not present.
 func (r *Reconciler) RemoveRoute(resource configmanager.ResourceIdentifier) {
 	logger.V(1).Info("removing resource", "resource", resource)
 	err := r.configManager.Remove(resource)
