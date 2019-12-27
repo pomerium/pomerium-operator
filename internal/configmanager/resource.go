@@ -10,11 +10,13 @@ import (
 	"k8s.io/client-go/kubernetes/scheme"
 )
 
+// A ResourceIdentifier is a Map-compatible representation of a cluster-unique name of a resource.  It captures Group, Version, Kind, Namespace and Name of the resource.
 type ResourceIdentifier struct {
 	GVK            schema.GroupVersionKind
 	NamespacedName types.NamespacedName
 }
 
+// NewResourceIdentifierFromObj returns a new ResourceIdentifier derived from the attributes of the obj passed in
 func NewResourceIdentifierFromObj(obj metav1.Object) (ResourceIdentifier, error) {
 	namespacedName := types.NamespacedName{
 		Name:      obj.GetName(),
