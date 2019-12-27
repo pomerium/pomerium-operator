@@ -7,6 +7,7 @@ import (
 	kzap "sigs.k8s.io/controller-runtime/pkg/log/zap"
 )
 
+// L is the global logr instance
 var L logr.Logger
 var level zap.AtomicLevel = zap.NewAtomicLevel()
 var z *zap.Logger
@@ -23,6 +24,7 @@ func setup() kzap.Opts {
 	}
 }
 
+// Debug sets the log output level to debug for the global logr L
 func Debug() {
 	level.SetLevel(zap.DebugLevel)
 }
