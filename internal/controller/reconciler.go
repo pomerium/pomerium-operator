@@ -22,6 +22,7 @@ import (
 
 var logger = log.L.WithValues("component", "reconciler")
 
+// Reconciler implements a Kubernetes reconciler for either a Service or Ingress resources.  Use NewReconciler() to initialize.
 type Reconciler struct {
 	client.Client
 	controllerAnnotation string
@@ -31,6 +32,11 @@ type Reconciler struct {
 	configManager        *configmanager.ConfigManager
 }
 
+// NewReconciler returns a new Reconciler for obj type Objects.
+//
+// configManager is called with configuration updates from reconcile cycles.
+//
+// controllerClass filters resources based on matching `kubernetes.io/XXXXX.class` where XXXXX is based on obj's type.
 func NewReconciler(obj runtime.Object, controllerClass string, configManager *configmanager.ConfigManager) *Reconciler {
 	r := &Reconciler{}
 	r.kind = obj
