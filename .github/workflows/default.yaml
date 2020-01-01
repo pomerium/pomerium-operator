@@ -56,7 +56,7 @@ jobs:
         run: docker build .
 
   publish-docker:
-    if: github.ref == 'master' && github.event == 'push'
+    if: github.ref == 'refs/heads/master' && github.event == 'push'
     runs-on: ubuntu-latest
     needs:
       - build
