@@ -1,3 +1,11 @@
+[![pomerium chat](https://img.shields.io/badge/chat-on%20slack-blue.svg?style=flat&logo=slack)](http://slack.pomerium.io)
+![Build Status](https://img.shields.io/github/workflow/status/pomerium/pomerium-operator/Default)
+[![Go Report Card](https://goreportcard.com/badge/github.com/pomerium/pomerium-operator)](https://goreportcard.com/report/github.com/pomerium/pomerium-operator)
+[![Documentation](https://godoc.org/github.com/pomerium/pomerium-operator?status.svg)](http://godoc.org/github.com/pomerium/pomerium-operator)
+[![LICENSE](https://img.shields.io/github/license/pomerium/pomerium-operator.svg)](https://github.com/pomerium/pomerium-operator/blob/master/LICENSE)
+[![codecov](https://img.shields.io/codecov/c/github/pomerium/pomerium-operator.svg?style=flat)](https://codecov.io/gh/pomerium/pomerium-operator)
+![Docker Pulls](https://img.shields.io/docker/pulls/pomerium/pomerium-operator)
+
 - [About](#about)
   - [Initial discussion](#initial-discussion)
 - [Installing](#installing)
