@@ -110,7 +110,7 @@ func init() {
 	rootCmd.PersistentFlags().BoolVar(&electionEnabled, "election", false, "Enable leader election (for running multiple controller replicas)")
 	rootCmd.PersistentFlags().StringVar(&electionConfigMap, "election-configmap", "operator-leader-pomerium", "Name of ConfigMap to use for leader election")
 	rootCmd.PersistentFlags().StringVar(&electionNamespace, "election-namespace", "kube-system", "Namespace to use for leader election")
-	rootCmd.PersistentFlags().StringVar(&metricsAddress, "metrics-address", "0", "Address for metrics listender.  Default disabled")
+	rootCmd.PersistentFlags().StringVar(&metricsAddress, "metrics-address", "0", "Address for metrics listener.  Default disabled")
 
 }
 
