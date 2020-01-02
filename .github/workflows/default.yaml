@@ -10,6 +10,8 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      CC_TEST_REPORTER_ID: e00c0ed949f5e40a348d609012867727924fc02dc8257004e76e54726fc55e60
     container:
       image: "golang:1.13"
     steps:
@@ -19,8 +21,23 @@ jobs:
       - name: Install go-task
         run: curl -sL https://taskfile.dev/install.sh | sh
 
+      - name: Code Climate Setup
+        run: |
+          curl -s -o cc-test-reporter -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64
+          chmod 755 cc-test-reporter
+          ./cc-test-reporter before-build
+
       - name: Test
         run: ./bin/task test
+
+      - name: Upload coverage to CodeCov
+        uses: codecov/codecov-action@v1
+        with:
+          token: 28166dce-db68-4268-aa44-ca35e1f6423a
+          file: ./cov.out
+
+      - name: Upload coverage to Code Climate
+        run: ./cc-test-reporter after-build --prefix github.com/${{ github.repository }}
 
   lint:
     runs-on: ubuntu-latest

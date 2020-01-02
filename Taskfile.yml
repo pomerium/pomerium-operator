@@ -23,9 +23,9 @@ tasks:
     deps:
       - kubebuilder
     cmds:
-      - go test -cover -coverprofile coverage.txt ./...
+      - go test -cover -coverprofile c.out ./...
     generates:
-      - coverage.txt
+      - c.out
     sources:
       - ./**/*.go
 
