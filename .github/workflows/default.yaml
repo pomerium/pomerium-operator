@@ -34,7 +34,7 @@ jobs:
         uses: codecov/codecov-action@v1
         with:
           token: 28166dce-db68-4268-aa44-ca35e1f6423a
-          file: ./cov.out
+          file: ./c.out
 
       - name: Upload coverage to Code Climate
         run: ./cc-test-reporter after-build --prefix github.com/${{ github.repository }}
