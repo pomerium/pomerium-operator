@@ -83,7 +83,7 @@ func (r *Reconciler) Reconcile(req reconcile.Request) (reconcile.Result, error) 
 	return reconcile.Result{}, nil
 }
 
-// UpsertRoute adds or updates a route entry into the ConfigManager associated with this Reconciler.  It will only do so if the controllerClass matches.
+// UpsertRoute adds or updates a route entry into the ConfigManager associated with this Reconciler.  It will only do so if the controllerClass matches or is absent
 func (r *Reconciler) UpsertRoute(resource configmanager.ResourceIdentifier, obj runtime.Object) {
 	if !r.ControllerClassMatch(obj.(metav1.Object)) {
 		logger.V(1).Info("resource does not match controller annotation", "resource", resource)
@@ -116,9 +116,9 @@ func (r *Reconciler) newKind() runtime.Object {
 	return k.Interface().(runtime.Object)
 }
 
-// ControllerClassMatch determines if an Object matches the controllerClass of the Reconciler
+// ControllerClassMatch determines if an Object matches the controllerClass of the Reconciler or has no controllerClass
 func (r *Reconciler) ControllerClassMatch(meta metav1.Object) bool {
 	annotations := meta.GetAnnotations()
 	class, exists := annotations[r.controllerAnnotation]
-	return exists && class == r.controllerClass
+	return (!exists) || (exists && class == r.controllerClass)
 }

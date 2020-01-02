@@ -23,7 +23,7 @@ tasks:
     deps:
       - kubebuilder
     cmds:
-      - go test -cover -coverprofile c.out ./...
+      - go test -cover -covermode=atomic -coverprofile c.out ./...
     generates:
       - c.out
     sources:
