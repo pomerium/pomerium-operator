@@ -6,6 +6,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/pomerium/pomerium-operator/internal/deploymentmanager"
+
 	"github.com/pomerium/pomerium-operator/internal/operator"
 
 	"github.com/pomerium/pomerium-operator/internal/configmanager"
@@ -28,19 +30,20 @@ import (
 )
 
 var (
-	kubeConfig        string
-	debug             bool
-	namespace         string
-	serviceClass      string
-	ingressClass      string
-	pomeriumNamespace string
-	pomeriumConfigMap string
-	electionConfigMap string
-	electionNamespace string
-	electionEnabled   bool
-	metricsAddress    string
-	baseConfigFile    string
-	logger            = log.L
+	kubeConfig          string
+	debug               bool
+	namespace           string
+	serviceClass        string
+	ingressClass        string
+	pomeriumNamespace   string
+	pomeriumConfigMap   string
+	electionConfigMap   string
+	electionNamespace   string
+	electionEnabled     bool
+	metricsAddress      string
+	baseConfigFile      string
+	logger              = log.L
+	pomeriumDeployments []string
 )
 
 var rootCmd = &cobra.Command{
@@ -61,10 +64,17 @@ var rootCmd = &cobra.Command{
 			return err
 		}
 
+		deploymentManager, err := newDeploymentManager(kcfg, pomeriumDeployments, "default")
+		if err != nil {
+			return err
+		}
+
 		configManager, err := newConfigManager(kcfg)
 		if err != nil {
 			return err
 		}
+
+		configManager.OnSave(deploymentManager.UpdateDeployments)
 
 		if err := ingressController(o, configManager); err != nil {
 			return err
@@ -111,7 +121,19 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&electionConfigMap, "election-configmap", "operator-leader-pomerium", "Name of ConfigMap to use for leader election")
 	rootCmd.PersistentFlags().StringVar(&electionNamespace, "election-namespace", "kube-system", "Namespace to use for leader election")
 	rootCmd.PersistentFlags().StringVar(&metricsAddress, "metrics-address", "0", "Address for metrics listener.  Default disabled")
+	rootCmd.PersistentFlags().StringSliceVar(&pomeriumDeployments, "pomerium-deployments", []string{}, "List of Deployments in the pomerium-namespace to update when the [base-config-file] changes")
 
+}
+
+func newDeploymentManager(config *rest.Config, deployments []string, namespace string) (dm *deploymentmanager.DeploymentManager, err error) {
+	c, err := client.New(config, client.Options{})
+	if err != nil {
+		return dm, fmt.Errorf("failed to create client for config manager: %w", err)
+	}
+
+	dm = deploymentmanager.NewDeploymentManager(deployments, namespace, c)
+
+	return
 }
 
 func newConfigManager(config *rest.Config) (cm *configmanager.ConfigManager, err error) {

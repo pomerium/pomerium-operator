@@ -36,6 +36,7 @@ type ConfigManager struct {
 	baseConfig   []byte
 	settleTicker *time.Ticker
 	pendingSave  bool
+	onSaves      []ConfigReceiver
 }
 
 // NewConfigManager returns a ConfigManager which uses client to update configMap in namespace at settlePeriod interval if
@@ -113,6 +114,7 @@ func (c *ConfigManager) Save() error {
 	}
 
 	logger.Info("successfully saved ConfigMap")
+	c.callOnSaves(tmpOptions)
 	c.pendingSave = false
 	return nil
 }
@@ -192,5 +194,21 @@ func (c *ConfigManager) saveLoop() {
 		if !ok {
 			break
 		}
+	}
+}
+
+// ConfigReceiver is called with the stored configuration of the ConfigurationManager
+type ConfigReceiver func(pomeriumconfig.Options)
+
+// OnSave adds a ConfigReceiver function to call when ConfigManager has successfully committed
+// configuration to storage.
+func (c *ConfigManager) OnSave(f ConfigReceiver) {
+	logger.V(1).Info("calling OnSave hooks")
+	c.onSaves = append(c.onSaves, f)
+}
+
+func (c *ConfigManager) callOnSaves(config pomeriumconfig.Options) {
+	for _, f := range c.onSaves {
+		f(config)
 	}
 }
