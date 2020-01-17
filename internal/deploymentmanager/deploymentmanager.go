@@ -3,9 +3,8 @@ package deploymentmanager
 import (
 	"context"
 
-	pomeriumconfig "github.com/pomerium/pomerium/config"
-
 	"github.com/pomerium/pomerium-operator/internal/log"
+	pomeriumconfig "github.com/pomerium/pomerium/config"
 	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -15,7 +14,7 @@ var logger = log.L.WithValues("component", "deploymentmanager")
 
 const deploymentConfigAnnotation = "pomerium.io/config-checksum"
 
-// A Deployment Manager is responsible for maintaining a set of kubernetes Deployments
+// Deployment Manager is responsible for maintaining a set of kubernetes Deployments
 type DeploymentManager struct {
 	namespace   string
 	deployments []string

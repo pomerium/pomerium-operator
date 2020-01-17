@@ -6,27 +6,18 @@ import (
 	"os"
 	"time"
 
-	"github.com/pomerium/pomerium-operator/internal/deploymentmanager"
-
-	"github.com/pomerium/pomerium-operator/internal/operator"
-
 	"github.com/pomerium/pomerium-operator/internal/configmanager"
+	"github.com/pomerium/pomerium-operator/internal/controller"
+	"github.com/pomerium/pomerium-operator/internal/deploymentmanager"
+	"github.com/pomerium/pomerium-operator/internal/log"
+	"github.com/pomerium/pomerium-operator/internal/operator"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+	corev1 "k8s.io/api/core/v1"
+	extensionsv1beta1 "k8s.io/api/extensions/v1beta1"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-
-	corev1 "k8s.io/api/core/v1"
-
-	"github.com/pomerium/pomerium-operator/internal/controller"
-
-	extensionsv1beta1 "k8s.io/api/extensions/v1beta1"
-
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
-
-	"github.com/pomerium/pomerium-operator/internal/log"
-
-	"github.com/spf13/viper"
-
-	"github.com/spf13/cobra"
 )
 
 var (
@@ -125,15 +116,15 @@ func init() {
 
 }
 
-func newDeploymentManager(config *rest.Config, deployments []string, namespace string) (dm *deploymentmanager.DeploymentManager, err error) {
+func newDeploymentManager(config *rest.Config, deployments []string, namespace string) (*deploymentmanager.DeploymentManager, error) {
 	c, err := client.New(config, client.Options{})
 	if err != nil {
-		return dm, fmt.Errorf("failed to create client for config manager: %w", err)
+		return nil, fmt.Errorf("failed to create client for config manager: %w", err)
 	}
 
-	dm = deploymentmanager.NewDeploymentManager(deployments, namespace, c)
+	dm := deploymentmanager.NewDeploymentManager(deployments, namespace, c)
 
-	return
+	return dm, nil
 }
 
 func newConfigManager(config *rest.Config) (cm *configmanager.ConfigManager, err error) {
