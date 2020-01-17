@@ -14,7 +14,7 @@ var logger = log.L.WithValues("component", "deploymentmanager")
 
 const deploymentConfigAnnotation = "pomerium.io/config-checksum"
 
-// Deployment Manager is responsible for maintaining a set of kubernetes Deployments
+// DeploymentManager is responsible for maintaining a set of kubernetes Deployments
 type DeploymentManager struct {
 	namespace   string
 	deployments []string
