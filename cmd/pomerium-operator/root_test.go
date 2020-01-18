@@ -3,14 +3,13 @@ package main
 import (
 	"io/ioutil"
 	"os"
-	"sigs.k8s.io/controller-runtime/pkg/client/fake"
+	"testing"
 
 	"github.com/pomerium/pomerium-operator/internal/deploymentmanager"
 	"github.com/stretchr/testify/assert"
 	"k8s.io/client-go/rest"
+	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
-
-	"testing"
 )
 
 func newTestEnv(t *testing.T) *envtest.Environment {
