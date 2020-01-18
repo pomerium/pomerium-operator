@@ -23,7 +23,7 @@ type DeploymentManager struct {
 
 // NewDeploymentManager returns a new DeploymentManager configured to manage a given set of deployments with a
 // kubernetes client
-func NewDeploymentManager(deployments []string, namespace string, client client.Client) *DeploymentManager {
+func NewDeploymentManager(client client.Client, deployments []string, namespace string) *DeploymentManager {
 	return &DeploymentManager{
 		namespace:   namespace,
 		deployments: deployments,

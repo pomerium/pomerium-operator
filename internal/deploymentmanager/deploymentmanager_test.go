@@ -75,7 +75,7 @@ func Test_UpdateDeployments(t *testing.T) {
 			deployment := newMockDeployment(tt.name, tt.namespace, tt.annotations)
 			c := fake.NewFakeClient(deployment)
 
-			dm := NewDeploymentManager([]string{tt.name}, managerNamespace, c)
+			dm := NewDeploymentManager(c, []string{tt.name}, managerNamespace)
 			dm.UpdateDeployments(tt.config)
 
 			updatedDeployment := &appsv1.Deployment{}

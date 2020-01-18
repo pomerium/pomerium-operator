@@ -65,7 +65,7 @@ var rootCmd = &cobra.Command{
 			return err
 		}
 
-		deploymentManager := deploymentmanager.NewDeploymentManager(pomeriumDeployments, pomeriumNamespace, kClient)
+		deploymentManager := deploymentmanager.NewDeploymentManager(kClient, pomeriumDeployments, pomeriumNamespace)
 		configManager.OnSave(deploymentManager.UpdateDeployments)
 
 		if err := ingressController(o, configManager); err != nil {

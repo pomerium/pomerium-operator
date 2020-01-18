@@ -37,7 +37,7 @@ func Test_main_setup(t *testing.T) {
 
 	kClient, _ := newRestClient(testCfg)
 	cm, _ := newConfigManager(kClient)
-	dm := deploymentmanager.NewDeploymentManager([]string{"pomerium-proxy"}, "test", kClient)
+	dm := deploymentmanager.NewDeploymentManager(kClient, []string{"pomerium-proxy"}, "test")
 	cm.OnSave(dm.UpdateDeployments)
 	err = serviceController(o, cm)
 	assert.NoError(t, err, "could not create service controller")
