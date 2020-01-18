@@ -3,7 +3,9 @@ package main
 import (
 	"io/ioutil"
 	"os"
+	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
+	"github.com/pomerium/pomerium-operator/internal/deploymentmanager"
 	"github.com/stretchr/testify/assert"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
@@ -33,7 +35,10 @@ func Test_main_setup(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, o)
 
-	cm, _ := newConfigManager(testCfg)
+	kClient, _ := newRestClient(testCfg)
+	cm, _ := newConfigManager(kClient)
+	dm := deploymentmanager.NewDeploymentManager([]string{"pomerium-proxy"}, "test", kClient)
+	cm.OnSave(dm.UpdateDeployments)
 	err = serviceController(o, cm)
 	assert.NoError(t, err, "could not create service controller")
 
@@ -42,7 +47,7 @@ func Test_main_setup(t *testing.T) {
 
 }
 
-func Test_newConfigManager(t *testing.T) {
+func Test_newRestClient(t *testing.T) {
 	testEnv := newTestEnv(t)
 	defer testEnv.Stop() //nolint: errcheck
 
@@ -58,14 +63,40 @@ func Test_newConfigManager(t *testing.T) {
 			wantErr: true,
 		},
 		{
+			name:    "good",
+			kcfg:    testEnv.Config,
+			wantErr: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c, err := newRestClient(tt.kcfg)
+			assert.Equal(t, tt.wantErr, err != nil)
+
+			if tt.wantErr {
+				return
+			}
+
+			assert.NotNil(t, c)
+			assert.NoError(t, err)
+		})
+	}
+}
+
+func Test_newConfigManager(t *testing.T) {
+	tests := []struct {
+		name       string
+		baseConfig []byte
+		wantErr    bool
+	}{
+		{
 			name:       "good",
-			kcfg:       testEnv.Config,
 			baseConfig: []byte("metrics_address: :9090"),
 			wantErr:    false,
 		},
 		{
 			name:    "bad base config",
-			kcfg:    testEnv.Config,
 			wantErr: true,
 		},
 	}
@@ -87,7 +118,8 @@ func Test_newConfigManager(t *testing.T) {
 				baseConfigFile = tmpBaseConfigFile.Name()
 			}
 
-			cm, err := newConfigManager(tt.kcfg)
+			kClient := fake.NewFakeClient()
+			cm, err := newConfigManager(kClient)
 			assert.Equal(t, tt.wantErr, err != nil)
 
 			if tt.wantErr {

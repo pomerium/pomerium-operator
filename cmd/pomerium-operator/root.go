@@ -55,16 +55,17 @@ var rootCmd = &cobra.Command{
 			return err
 		}
 
-		deploymentManager, err := newDeploymentManager(kcfg, pomeriumDeployments, "default")
+		kClient, err := newRestClient(kcfg)
 		if err != nil {
 			return err
 		}
 
-		configManager, err := newConfigManager(kcfg)
+		configManager, err := newConfigManager(kClient)
 		if err != nil {
 			return err
 		}
 
+		deploymentManager := deploymentmanager.NewDeploymentManager(pomeriumDeployments, pomeriumNamespace, kClient)
 		configManager.OnSave(deploymentManager.UpdateDeployments)
 
 		if err := ingressController(o, configManager); err != nil {
@@ -116,24 +117,17 @@ func init() {
 
 }
 
-func newDeploymentManager(config *rest.Config, deployments []string, namespace string) (*deploymentmanager.DeploymentManager, error) {
+func newRestClient(config *rest.Config) (client.Client, error) {
 	c, err := client.New(config, client.Options{})
 	if err != nil {
 		return nil, fmt.Errorf("failed to create client for config manager: %w", err)
 	}
 
-	dm := deploymentmanager.NewDeploymentManager(deployments, namespace, c)
-
-	return dm, nil
+	return c, nil
 }
 
-func newConfigManager(config *rest.Config) (cm *configmanager.ConfigManager, err error) {
-	c, err := client.New(config, client.Options{})
-	if err != nil {
-		return cm, fmt.Errorf("failed to create client for config manager: %w", err)
-	}
-
-	cm = configmanager.NewConfigManager(pomeriumNamespace, pomeriumConfigMap, c, time.Second*10)
+func newConfigManager(kClient client.Client) (cm *configmanager.ConfigManager, err error) {
+	cm = configmanager.NewConfigManager(pomeriumNamespace, pomeriumConfigMap, kClient, time.Second*10)
 
 	baseBytes, err := ioutil.ReadFile(baseConfigFile)
 	if err != nil {
