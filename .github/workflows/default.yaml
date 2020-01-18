@@ -47,7 +47,7 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v1.1.0
       - name: Lint
-        run: golangci-lint run -v
+        run: golangci-lint run
 
   build:
     runs-on: ubuntu-latest
