@@ -6,41 +6,35 @@ import (
 	"os"
 	"time"
 
-	"github.com/pomerium/pomerium-operator/internal/operator"
-
 	"github.com/pomerium/pomerium-operator/internal/configmanager"
+	"github.com/pomerium/pomerium-operator/internal/controller"
+	"github.com/pomerium/pomerium-operator/internal/deploymentmanager"
+	"github.com/pomerium/pomerium-operator/internal/log"
+	"github.com/pomerium/pomerium-operator/internal/operator"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+	corev1 "k8s.io/api/core/v1"
+	extensionsv1beta1 "k8s.io/api/extensions/v1beta1"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-
-	corev1 "k8s.io/api/core/v1"
-
-	"github.com/pomerium/pomerium-operator/internal/controller"
-
-	extensionsv1beta1 "k8s.io/api/extensions/v1beta1"
-
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
-
-	"github.com/pomerium/pomerium-operator/internal/log"
-
-	"github.com/spf13/viper"
-
-	"github.com/spf13/cobra"
 )
 
 var (
-	kubeConfig        string
-	debug             bool
-	namespace         string
-	serviceClass      string
-	ingressClass      string
-	pomeriumNamespace string
-	pomeriumConfigMap string
-	electionConfigMap string
-	electionNamespace string
-	electionEnabled   bool
-	metricsAddress    string
-	baseConfigFile    string
-	logger            = log.L
+	kubeConfig          string
+	debug               bool
+	namespace           string
+	serviceClass        string
+	ingressClass        string
+	pomeriumNamespace   string
+	pomeriumConfigMap   string
+	electionConfigMap   string
+	electionNamespace   string
+	electionEnabled     bool
+	metricsAddress      string
+	baseConfigFile      string
+	logger              = log.L
+	pomeriumDeployments []string
 )
 
 var rootCmd = &cobra.Command{
@@ -61,10 +55,18 @@ var rootCmd = &cobra.Command{
 			return err
 		}
 
-		configManager, err := newConfigManager(kcfg)
+		kClient, err := newRestClient(kcfg)
 		if err != nil {
 			return err
 		}
+
+		configManager, err := newConfigManager(kClient)
+		if err != nil {
+			return err
+		}
+
+		deploymentManager := deploymentmanager.NewDeploymentManager(kClient, pomeriumDeployments, pomeriumNamespace)
+		configManager.OnSave(deploymentManager.UpdateDeployments)
 
 		if err := ingressController(o, configManager); err != nil {
 			return err
@@ -111,16 +113,21 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&electionConfigMap, "election-configmap", "operator-leader-pomerium", "Name of ConfigMap to use for leader election")
 	rootCmd.PersistentFlags().StringVar(&electionNamespace, "election-namespace", "kube-system", "Namespace to use for leader election")
 	rootCmd.PersistentFlags().StringVar(&metricsAddress, "metrics-address", "0", "Address for metrics listener.  Default disabled")
+	rootCmd.PersistentFlags().StringSliceVar(&pomeriumDeployments, "pomerium-deployments", []string{}, "List of Deployments in the pomerium-namespace to update when the [base-config-file] changes")
 
 }
 
-func newConfigManager(config *rest.Config) (cm *configmanager.ConfigManager, err error) {
+func newRestClient(config *rest.Config) (client.Client, error) {
 	c, err := client.New(config, client.Options{})
 	if err != nil {
-		return cm, fmt.Errorf("failed to create client for config manager: %w", err)
+		return nil, fmt.Errorf("failed to create client for config manager: %w", err)
 	}
 
-	cm = configmanager.NewConfigManager(pomeriumNamespace, pomeriumConfigMap, c, time.Second*10)
+	return c, nil
+}
+
+func newConfigManager(kClient client.Client) (cm *configmanager.ConfigManager, err error) {
+	cm = configmanager.NewConfigManager(pomeriumNamespace, pomeriumConfigMap, kClient, time.Second*10)
 
 	baseBytes, err := ioutil.ReadFile(baseConfigFile)
 	if err != nil {

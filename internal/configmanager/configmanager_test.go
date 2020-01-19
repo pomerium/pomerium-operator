@@ -234,3 +234,41 @@ func Test_Save_unmarshalError(t *testing.T) {
 	assert.Error(t, cm.Save())
 
 }
+
+type mockSaveCallback struct {
+	called       int
+	calledConfig pomeriumconfig.Options
+}
+
+func (m *mockSaveCallback) Call(config pomeriumconfig.Options) {
+	m.called++
+	m.calledConfig = config
+}
+
+func Test_OnSave(t *testing.T) {
+	callback := &mockSaveCallback{}
+
+	baseConfig := mockBaseConfigBytes(t)
+	cm := NewConfigManager("test", "pomerium", newMockClient(t), time.Nanosecond*1)
+
+	err := cm.SetBaseConfig(baseConfig)
+	cm.Set(newIngressResourceIdentifier("test"), []pomeriumconfig.Policy{{To: "foo", From: "bar"}})
+	assert.NoError(t, err)
+
+	cm.OnSave(callback.Call)
+
+	err = cm.Save()
+	assert.NoError(t, err)
+	persistedConfig, err := cm.GetPersistedConfig()
+	assert.NoError(t, err)
+
+	assert.Equal(t, 1, callback.called)
+	assert.Empty(t, cmp.Diff(persistedConfig, callback.calledConfig, cmpopts.IgnoreUnexported(pomeriumconfig.Options{})))
+
+	cm.OnSave(callback.Call)
+	err = cm.Save()
+
+	assert.NoError(t, err)
+	assert.Equal(t, 3, callback.called)
+	assert.Empty(t, cmp.Diff(persistedConfig, callback.calledConfig, cmpopts.IgnoreUnexported(pomeriumconfig.Options{})))
+}
