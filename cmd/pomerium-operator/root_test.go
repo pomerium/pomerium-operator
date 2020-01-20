@@ -6,6 +6,8 @@ import (
 	"testing"
 
 	"github.com/pomerium/pomerium-operator/internal/deploymentmanager"
+	"github.com/spf13/pflag"
+	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -114,7 +116,7 @@ func Test_newConfigManager(t *testing.T) {
 				err = tmpBaseConfigFile.Close()
 				assert.NoError(t, err, "could not close base configuration file")
 
-				baseConfigFile = tmpBaseConfigFile.Name()
+				operatorCfg.BaseConfigFile = tmpBaseConfigFile.Name()
 			}
 
 			kClient := fake.NewFakeClient()
@@ -169,4 +171,41 @@ users: []`
 	kcfg, err := getConfig()
 	assert.NoError(t, err)
 	assert.NotNil(t, kcfg)
+}
+
+func Test_bindViper(t *testing.T) {
+
+	testFlagValue := "Test Flag"
+	testEnvValue := "Test Env"
+	tests := []struct {
+		name   string
+		flag   string
+		env    string
+		option string
+	}{
+		{"simple", "namespace", "NAMESPACE", "Namespace"},
+		{"kebab", "base-config-file", "BASE_CONFIG_FILE", "BaseConfigFile"},
+		{"boolean", "debug", "DEBUG", "Debug"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			defer os.Unsetenv(tt.env)
+
+			v := viper.New()
+			flagSet := &pflag.FlagSet{}
+			flagSet.String(tt.flag, "", "")
+
+			err := bindViper(v, flagSet)
+			assert.NoError(t, err)
+
+			os.Setenv(tt.env, testEnvValue)
+			assert.Equal(t, testEnvValue, v.GetString(tt.option))
+
+			err = flagSet.Set(tt.flag, testFlagValue)
+			assert.NoError(t, err)
+			assert.Equal(t, testFlagValue, v.GetString(tt.option))
+		})
+	}
+
 }
