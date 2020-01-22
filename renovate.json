@@ -1,0 +1,24 @@
+{
+	"extends": [
+		"config:base"
+	],
+	"prHourlyLimit": 0,
+	"schedule": ["after 7pm every monday"],
+	"packageRules": [{
+		"packageNames": [
+			"k8s.io/apimachinery",
+			"k8s.io/client-go",
+			"k8s.io/api",
+			"sigs.k8s.io/controller-runtime",
+			"k8s.io/client-go"
+		],
+		"groupName": "Kubernetes",
+		"separateMinorPatch": true,
+		"minor": {
+			"enabled": false
+		},
+		"major": {
+			"enabled": false
+		}
+	}]
+}
