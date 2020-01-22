@@ -2,6 +2,8 @@
 	"extends": [
 		"config:base"
 	],
+	"prHourlyLimit": 0,
+	"schedule": ["after 7pm every monday"],
 	"packageRules": [{
 		"packageNames": [
 			"k8s.io/apimachinery",
