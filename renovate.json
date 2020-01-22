@@ -11,6 +11,8 @@
 		],
 		"groupName": "Kubernetes",
 		"separateMinorPatch": true,
-		"updateTypes": ["patch"]
+		"minor": {
+			"enabled": false
+		}
 	}]
 }
