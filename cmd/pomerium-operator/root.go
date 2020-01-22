@@ -6,12 +6,14 @@ import (
 	"os"
 	"time"
 
+	"github.com/iancoleman/strcase"
 	"github.com/pomerium/pomerium-operator/internal/configmanager"
 	"github.com/pomerium/pomerium-operator/internal/controller"
 	"github.com/pomerium/pomerium-operator/internal/deploymentmanager"
 	"github.com/pomerium/pomerium-operator/internal/log"
 	"github.com/pomerium/pomerium-operator/internal/operator"
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 	corev1 "k8s.io/api/core/v1"
 	extensionsv1beta1 "k8s.io/api/extensions/v1beta1"
@@ -21,30 +23,44 @@ import (
 )
 
 var (
-	kubeConfig          string
-	debug               bool
-	namespace           string
-	serviceClass        string
-	ingressClass        string
-	pomeriumNamespace   string
-	pomeriumConfigMap   string
-	electionConfigMap   string
-	electionNamespace   string
-	electionEnabled     bool
-	metricsAddress      string
-	baseConfigFile      string
-	logger              = log.L
-	pomeriumDeployments []string
+	vcfg        *viper.Viper = viper.New()
+	logger                   = log.L
+	operatorCfg              = &cmdConfig{}
 )
+
+type cmdConfig struct {
+	BaseConfigFile      string
+	Debug               bool
+	Election            bool
+	ElectionConfigMap   string
+	ElectionNamespace   string
+	IngressClass        string
+	MetricsAddress      string
+	Namespace           string
+	PomeriumConfigMap   string
+	PomeriumNamespace   string
+	PomeriumDeployments []string
+	ServiceClass        string
+}
 
 var rootCmd = &cobra.Command{
 	Use:   "pomerium-operator",
 	Short: "pomerium-operator is a kubernetes operator for pomerium identity aware proxy",
-	RunE: func(cmd *cobra.Command, args []string) error {
-		if debug {
+	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+		err := vcfg.Unmarshal(operatorCfg)
+		if err != nil {
+			return err
+		}
+
+		if operatorCfg.Debug {
 			log.Debug()
 		}
 
+		logger.V(1).Info("started with config", "config", operatorCfg)
+
+		return nil
+	},
+	RunE: func(cmd *cobra.Command, args []string) error {
 		kcfg, err := getConfig()
 		if err != nil {
 			return err
@@ -65,7 +81,7 @@ var rootCmd = &cobra.Command{
 			return err
 		}
 
-		deploymentManager := deploymentmanager.NewDeploymentManager(kClient, pomeriumDeployments, pomeriumNamespace)
+		deploymentManager := deploymentmanager.NewDeploymentManager(kClient, operatorCfg.PomeriumDeployments, operatorCfg.PomeriumNamespace)
 		configManager.OnSave(deploymentManager.UpdateDeployments)
 
 		if err := ingressController(o, configManager); err != nil {
@@ -87,34 +103,31 @@ var rootCmd = &cobra.Command{
 }
 
 func main() {
-	err := viper.BindPFlags(rootCmd.PersistentFlags())
-	if err != nil {
-		fmt.Println(fmt.Errorf("failed to bind pflags: %w", err))
-		os.Exit(1)
-	}
-	viper.AutomaticEnv()
-
 	if err := rootCmd.Execute(); err != nil {
 		os.Exit(1)
 	}
 }
 func init() {
-	rootCmd.PersistentFlags().StringVar(&kubeConfig, "kubeconfig", "", "Path to kubeconfig file")
-	rootCmd.PersistentFlags().BoolVar(&debug, "debug", false, "Run in debug mode")
-	rootCmd.PersistentFlags().StringVarP(&namespace, "namespace", "n", "", "Namespaces to monitor")
-	rootCmd.PersistentFlags().StringVar(&pomeriumConfigMap, "pomerium-configmap", "pomerium", "Name of pomerium ConfigMap to maintain")
-	rootCmd.PersistentFlags().StringVar(&pomeriumNamespace, "pomerium-namespace", "kube-system", "Name of pomerium ConfigMap to maintain")
-	rootCmd.PersistentFlags().StringVar(&baseConfigFile, "base-config-file", "./pomerium-base.yaml", "Path to base configuration file")
+	rootCmd.PersistentFlags().Bool("debug", false, "Run in debug mode")
+	rootCmd.PersistentFlags().StringP("namespace", "n", "", "Namespaces to monitor")
+	rootCmd.PersistentFlags().String("pomerium-configmap", "pomerium", "Name of pomerium ConfigMap to maintain")
+	rootCmd.PersistentFlags().String("pomerium-namespace", "kube-system", "Name of pomerium ConfigMap to maintain")
+	rootCmd.PersistentFlags().String("base-config-file", "./pomerium-base.yaml", "Path to base configuration file")
 
-	rootCmd.PersistentFlags().StringVarP(&serviceClass, "service-class", "s", "pomerium", "kubernetes.io/service.class to monitor")
-	rootCmd.PersistentFlags().StringVarP(&ingressClass, "ingress-class", "i", "pomerium", "kubernetes.io/ingress.class to monitor")
+	rootCmd.PersistentFlags().StringP("service-class", "s", "pomerium", "kubernetes.io/service.class to monitor")
+	rootCmd.PersistentFlags().StringP("ingress-class", "i", "pomerium", "kubernetes.io/ingress.class to monitor")
 
-	rootCmd.PersistentFlags().BoolVar(&electionEnabled, "election", false, "Enable leader election (for running multiple controller replicas)")
-	rootCmd.PersistentFlags().StringVar(&electionConfigMap, "election-configmap", "operator-leader-pomerium", "Name of ConfigMap to use for leader election")
-	rootCmd.PersistentFlags().StringVar(&electionNamespace, "election-namespace", "kube-system", "Namespace to use for leader election")
-	rootCmd.PersistentFlags().StringVar(&metricsAddress, "metrics-address", "0", "Address for metrics listener.  Default disabled")
-	rootCmd.PersistentFlags().StringSliceVar(&pomeriumDeployments, "pomerium-deployments", []string{}, "List of Deployments in the pomerium-namespace to update when the [base-config-file] changes")
+	rootCmd.PersistentFlags().Bool("election", false, "Enable leader election (for running multiple controller replicas)")
+	rootCmd.PersistentFlags().String("election-configmap", "operator-leader-pomerium", "Name of ConfigMap to use for leader election")
+	rootCmd.PersistentFlags().String("election-namespace", "kube-system", "Namespace to use for leader election")
+	rootCmd.PersistentFlags().String("metrics-address", "0", "Address for metrics listener.  Default disabled")
+	rootCmd.PersistentFlags().StringSlice("pomerium-deployments", []string{}, "List of Deployments in the pomerium-namespace to update when the [base-config-file] changes")
 
+	err := bindViper(vcfg, rootCmd.PersistentFlags())
+	if err != nil {
+		fmt.Println(fmt.Errorf("failed to bind pflags: %w", err))
+		os.Exit(1)
+	}
 }
 
 func newRestClient(config *rest.Config) (client.Client, error) {
@@ -127,7 +140,8 @@ func newRestClient(config *rest.Config) (client.Client, error) {
 }
 
 func newConfigManager(kClient client.Client) (cm *configmanager.ConfigManager, err error) {
-	cm = configmanager.NewConfigManager(pomeriumNamespace, pomeriumConfigMap, kClient, time.Second*10)
+	baseConfigFile := operatorCfg.BaseConfigFile
+	cm = configmanager.NewConfigManager(operatorCfg.PomeriumNamespace, operatorCfg.PomeriumConfigMap, kClient, time.Second*10)
 
 	baseBytes, err := ioutil.ReadFile(baseConfigFile)
 	if err != nil {
@@ -143,12 +157,12 @@ func newConfigManager(kClient client.Client) (cm *configmanager.ConfigManager, e
 
 func ingressReconciler(cm *configmanager.ConfigManager) *controller.Reconciler {
 	ingressResource := &extensionsv1beta1.Ingress{}
-	return controller.NewReconciler(ingressResource, ingressClass, cm)
+	return controller.NewReconciler(ingressResource, operatorCfg.IngressClass, cm)
 }
 
 func serviceReconciler(cm *configmanager.ConfigManager) *controller.Reconciler {
 	serviceResource := &corev1.Service{}
-	return controller.NewReconciler(serviceResource, serviceClass, cm)
+	return controller.NewReconciler(serviceResource, operatorCfg.ServiceClass, cm)
 }
 
 func ingressController(o *operator.Operator, cm *configmanager.ConfigManager) (err error) {
@@ -178,10 +192,10 @@ func createOperator(kcfg *rest.Config) (*operator.Operator, error) {
 	o, err := operator.NewOperator(
 		operator.Options{
 			KubeConfig:         kcfg,
-			NameSpace:          namespace,
-			ServiceClass:       serviceClass,
-			IngressClass:       ingressClass,
-			MetricsBindAddress: metricsAddress,
+			NameSpace:          operatorCfg.Namespace,
+			ServiceClass:       operatorCfg.ServiceClass,
+			IngressClass:       operatorCfg.IngressClass,
+			MetricsBindAddress: operatorCfg.MetricsAddress,
 		},
 	)
 	return o, err
@@ -197,4 +211,22 @@ func getConfig() (*rest.Config, error) {
 
 	logger.V(1).Info("found kubeconfig.  connecting.", "api-server", kcfg.Host)
 	return kcfg, nil
+}
+
+func bindViper(v *viper.Viper, flags *pflag.FlagSet) (err error) {
+	flags.VisitAll(func(flag *pflag.Flag) {
+		camelCasedFlag := strcase.ToCamel(flag.Name)
+		snakeCasedFlag := strcase.ToScreamingSnake(flag.Name)
+
+		err = v.BindPFlag(camelCasedFlag, flag)
+		if err != nil {
+			return
+		}
+
+		err = v.BindEnv(camelCasedFlag, snakeCasedFlag)
+		if err != nil {
+			return
+		}
+	})
+	return nil
 }
