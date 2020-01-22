@@ -209,7 +209,12 @@ func getConfig() (*rest.Config, error) {
 		return nil, err
 	}
 
-	logger.V(1).Info("found kubeconfig.  connecting.", "api-server", kcfg.Host)
+	// Set an API call timeout if the user doesn't provide one
+	if kcfg.Timeout == 0 {
+		kcfg.Timeout = 15 * time.Second
+	}
+
+	logger.V(1).Info("found kubeconfig", "api-server", kcfg.Host)
 	return kcfg, nil
 }
 
