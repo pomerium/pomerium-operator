@@ -1,5 +1,19 @@
 {
   "extends": [
     "config:base"
+  ],
+  "packageRules": [
+    {
+      "packageNames": [
+        "k8s.io/apimachinery", 
+        "k8s.io/client-go", 
+        "k8s.io/api", 
+        "sigs.k8s.io/controller-runtime"
+      ],
+      "groupName": "Kubernetes",
+      "separateMinorPatch": true,
+      "updateTypes": ["patch"],
+    }
   ]
+
 }
