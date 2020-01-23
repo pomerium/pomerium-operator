@@ -40,10 +40,6 @@ func Test_policyFromObj(t *testing.T) {
 					To:            "http://test-service-string.default.svc.cluster.local:443",
 					AllowedGroups: []string{"foo", "bar"},
 				},
-				{
-					To:            "http://default-service.default.svc.cluster.local:443",
-					AllowedGroups: []string{"foo", "bar"},
-				},
 			},
 			fakeObjs: []runtime.Object{
 				&corev1.Service{
@@ -108,8 +104,8 @@ func Test_policyFromObj(t *testing.T) {
 		{
 			name: "service-https",
 			wantPolicy: []pomeriumconfig.Policy{
-				{To: "https://test-service.default.svc.cluster.local:443", AllowedEmails: []string{"user@beyondcorp.org"}},
-				{To: "https://test-service.default.svc.cluster.local:9000", AllowedEmails: []string{"user@beyondcorp.org"}},
+				{To: "https://test-service.default.svc.cluster.local:443", From: "https://test.lan.beyondcorp.org", AllowedEmails: []string{"user@beyondcorp.org"}},
+				{To: "https://test-service.default.svc.cluster.local:9000", From: "https://test.lan.beyondcorp.org", AllowedEmails: []string{"user@beyondcorp.org"}},
 			},
 			obj: func() runtime.Object {
 				o := &corev1.Service{}
@@ -120,6 +116,7 @@ func Test_policyFromObj(t *testing.T) {
 					"ingress.pomerium.io/allowed_users":               `["user@beyondcorp.org"]`,
 					"kubernetes.io/ingress.class":                     "pomerium",
 					"pomerium.ingress.kubernetes.io/backend-protocol": "https",
+					"ingress.pomerium.io/from":                        "https://test.lan.beyondcorp.org",
 				}
 				o.Spec.Ports = []corev1.ServicePort{
 					{Name: "https", Port: 443},
