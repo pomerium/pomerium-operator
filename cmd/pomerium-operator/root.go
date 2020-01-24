@@ -131,7 +131,15 @@ func init() {
 }
 
 func newRestClient(config *rest.Config) (client.Client, error) {
-	c, err := client.New(config, client.Options{})
+	if config == nil {
+		return nil, fmt.Errorf("invalid rest config passed")
+	}
+	// Set a timeout for any clients we create for object managers
+	// TODO this should be configurable
+	restConfig := rest.CopyConfig(config)
+	restConfig.Timeout = 30 * time.Second
+
+	c, err := client.New(restConfig, client.Options{})
 	if err != nil {
 		return nil, fmt.Errorf("failed to create client for config manager: %w", err)
 	}
@@ -207,11 +215,6 @@ func getConfig() (*rest.Config, error) {
 	if err != nil {
 		logger.Error(err, "failed to find kubeconfig")
 		return nil, err
-	}
-
-	// Set an API call timeout if the user doesn't provide one
-	if kcfg.Timeout == 0 {
-		kcfg.Timeout = 15 * time.Second
 	}
 
 	logger.V(1).Info("found kubeconfig", "api-server", kcfg.Host)
