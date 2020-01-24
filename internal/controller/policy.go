@@ -77,13 +77,24 @@ func (r *Reconciler) policyFromObj(obj runtime.Object) ([]pomeriumconfig.Policy,
 		return nil, err
 	}
 
+	validatedPolicies := make([]pomeriumconfig.Policy, 0)
 	// merge settings from annotations onto each policy
 	for k := range policies {
 		if err := yaml.Unmarshal([]byte(policyOptionsJSON), &policies[k]); err != nil {
 			return nil, fmt.Errorf("failed to insert policy options into policy: %w", err)
 		}
+
+		testPolicy := policies[k]
+		// We can only validate policies after annotations are fully merged.
+		if err := testPolicy.Validate(); err != nil {
+			logger.Info("ignoring invalid policy", "validation-error", err)
+			continue
+		}
+
+		validatedPolicies = append(validatedPolicies, policies[k])
+
 	}
-	return policies, nil
+	return validatedPolicies, nil
 }
 
 // policyHostnamesFromObj returns an array of pomerium policies with the `to` and `from` values mapped
