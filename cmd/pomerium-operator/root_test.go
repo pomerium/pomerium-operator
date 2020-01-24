@@ -4,7 +4,6 @@ import (
 	"io/ioutil"
 	"os"
 	"testing"
-	"time"
 
 	"github.com/pomerium/pomerium-operator/internal/deploymentmanager"
 	"github.com/spf13/pflag"
@@ -172,7 +171,6 @@ users: []`
 	kcfg, err := getConfig()
 	assert.NoError(t, err)
 	assert.NotNil(t, kcfg)
-	assert.Equal(t, 15*time.Second, kcfg.Timeout)
 }
 
 func Test_bindViper(t *testing.T) {
