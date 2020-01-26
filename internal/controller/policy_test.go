@@ -133,12 +133,12 @@ func Test_policyFromObj(t *testing.T) {
 			},
 		},
 		{
-			name:       "bad type",
+			name:       "no annotations",
 			wantPolicy: []pomeriumconfig.Policy{},
 			obj: func() runtime.Object {
-				return &corev1.ConfigMap{}
+				return &networkingv1beta1.Ingress{}
 			},
-			wantErr: true,
+			wantErr: false,
 		},
 		{
 			name:       "missing service for string port",

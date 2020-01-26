@@ -157,6 +157,7 @@ func Test_Reconcile_2(t *testing.T) {
 					Namespace: "test",
 					Annotations: map[string]string{
 						"ingress.pomerium.io/allowed_groups": `["foo","bar"]`,
+						"ingress.pomerium.io/from":           `https://test.lan.beyondcorp.org`,
 						"kubernetes.io/ingress.class":        "pomerium",
 					},
 				},
@@ -183,6 +184,7 @@ func Test_Reconcile_2(t *testing.T) {
 					Namespace: "test",
 					Annotations: map[string]string{
 						"ingress.pomerium.io/allowed_groups": `["foo","bar"]`,
+						"ingress.pomerium.io/from":           `https://test.lan.beyondcorp.org`,
 						"kubernetes.io/service.class":        "pomerium",
 					},
 				},
