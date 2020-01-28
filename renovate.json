@@ -4,6 +4,7 @@
 	],
 	"prHourlyLimit": 0,
 	"schedule": ["after 7pm every monday"],
+	"automerge": true,
 	"packageRules": [{
 		"packageNames": [
 			"k8s.io/apimachinery",
