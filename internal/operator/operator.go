@@ -63,7 +63,7 @@ func NewOperator(opts Options) (*Operator, error) {
 	}
 	logger.V(1).Info("manager created")
 
-	operator := Operator{opts: opts, mgr: mgr, builder: builder.ControllerManagedBy(mgr)}
+	operator := Operator{opts: opts, mgr: mgr, builder: builder.ControllerManagedBy(mgr), stopCh: opts.StopCh}
 
 	return &operator, nil
 }

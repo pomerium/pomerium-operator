@@ -2,6 +2,7 @@ package operator
 
 import (
 	"context"
+	"sync"
 	"testing"
 
 	corev1 "k8s.io/api/core/v1"
@@ -100,10 +101,15 @@ func Test_StartController(t *testing.T) {
 		return
 	}
 
+	wg := &sync.WaitGroup{}
+	wg.Add(1)
 	go func() {
+		defer wg.Done()
+
 		err = o.Start()
 		assert.NoError(t, err)
 	}()
 
 	close(stopCh)
+	wg.Wait()
 }
