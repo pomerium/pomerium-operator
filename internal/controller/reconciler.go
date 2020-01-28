@@ -96,6 +96,11 @@ func (r *Reconciler) UpsertRoute(resource configmanager.ResourceIdentifier, obj 
 		return
 	}
 
+	if len(policy) == 0 {
+		logger.V(1).Info("no policy generated", "resource", resource)
+		return
+	}
+
 	logger.V(1).Info("got resource with policy", "policy", policy, "resource", resource)
 	r.configManager.Set(resource, policy)
 }

@@ -27,8 +27,9 @@ import (
 // parameters onto each Policy implied by the collection of Backends or the
 // Service described by obj
 //
-// In practice you will get a Policy element for each Service referred to
-// by obj.  All annotations on obj are attached to each Policy element.
+// All annotations on obj are attached to each Policy element.
+//
+// If there are no pomerium related annotations, a zero length []Policy will be returned
 func (r *Reconciler) policyFromObj(obj runtime.Object) ([]pomeriumconfig.Policy, error) {
 
 	metaObj, ok := obj.(metav1.Object)
@@ -63,6 +64,11 @@ func (r *Reconciler) policyFromObj(obj runtime.Object) ([]pomeriumconfig.Policy,
 			}
 
 		}
+	}
+
+	// If there are no policy annotations, skip this resource
+	if len(policyOptions) == 0 {
+		return []pomeriumconfig.Policy{}, nil
 	}
 
 	// coerce an actual JSON structure from the escaped value in the annotation
