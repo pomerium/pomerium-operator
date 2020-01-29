@@ -199,11 +199,14 @@ func serviceController(o *operator.Operator, cm *configmanager.ConfigManager) (e
 func createOperator(kcfg *rest.Config) (*operator.Operator, error) {
 	o, err := operator.NewOperator(
 		operator.Options{
-			KubeConfig:         kcfg,
-			NameSpace:          operatorCfg.Namespace,
-			ServiceClass:       operatorCfg.ServiceClass,
-			IngressClass:       operatorCfg.IngressClass,
-			MetricsBindAddress: operatorCfg.MetricsAddress,
+			KubeConfig:              kcfg,
+			NameSpace:               operatorCfg.Namespace,
+			ServiceClass:            operatorCfg.ServiceClass,
+			IngressClass:            operatorCfg.IngressClass,
+			MetricsBindAddress:      operatorCfg.MetricsAddress,
+			LeaderElection:          operatorCfg.Election,
+			LeaderElectionID:        operatorCfg.ElectionConfigMap,
+			LeaderElectionNamespace: operatorCfg.ElectionNamespace,
 		},
 	)
 	return o, err

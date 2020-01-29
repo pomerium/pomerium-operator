@@ -48,6 +48,7 @@ func NewConfigManager(namespace string, configMap string, client client.Client, 
 		client:       client,
 		policyList:   make(map[ResourceIdentifier][]pomeriumconfig.Policy),
 		settleTicker: time.NewTicker(settlePeriod),
+		pendingSave:  true,
 	}
 }
 
