@@ -173,7 +173,9 @@ func (c *ConfigManager) GetPersistedConfig() (options pomeriumconfig.Options, er
 	return
 }
 
-// Start begins the periodic save loop to persist in-memory configuration to the API
+// Start implements manager.Runnable
+//
+//begins the periodic save loop to persist in-memory configuration to the API
 func (c *ConfigManager) Start(stopCh <-chan struct{}) error {
 	for {
 		select {
