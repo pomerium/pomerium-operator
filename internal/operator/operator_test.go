@@ -83,7 +83,20 @@ func Test_CreateController(t *testing.T) {
 			assert.NoError(t, err)
 		})
 	}
+}
 
+type fakeRunnable struct {
+	startCalled bool
+	stopCalled  bool
+	wg          *sync.WaitGroup
+}
+
+func (f *fakeRunnable) Start(stopCh <-chan struct{}) error {
+	defer f.wg.Done()
+	f.startCalled = true
+	<-stopCh
+	f.stopCalled = true
+	return nil
 }
 
 func Test_StartController(t *testing.T) {
@@ -102,6 +115,11 @@ func Test_StartController(t *testing.T) {
 	}
 
 	wg := &sync.WaitGroup{}
+
+	r := &fakeRunnable{wg: wg}
+	wg.Add(1)
+	o.Add(r) //nolint: errcheck
+
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
@@ -112,4 +130,8 @@ func Test_StartController(t *testing.T) {
 
 	close(stopCh)
 	wg.Wait()
+
+	// Make sure runnable was stopped
+	assert.True(t, r.stopCalled)
+	assert.True(t, r.startCalled)
 }

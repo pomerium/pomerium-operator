@@ -90,6 +90,11 @@ func (o *Operator) Start() error {
 	return nil
 }
 
+// Add ensures a manager.Runnable is started with the rest of the operator
+func (o *Operator) Add(f manager.Runnable) error {
+	return o.mgr.Add(f)
+}
+
 // CreateController registers a new Reconciler with the Operator and associates it with an object type to handle events for.
 func (o *Operator) CreateController(reconciler reconcile.Reconciler, name string, object runtime.Object) error {
 	log.L.V(1).Info("adding controller", "name", name, "kind", object.GetObjectKind().GroupVersionKind().Kind)
