@@ -72,8 +72,8 @@ func (c *ConfigManager) Remove(id ResourceIdentifier) error {
 	defer c.mutex.Unlock()
 
 	if _, ok := c.policyList[id]; !ok {
-		logger.V(1).Info("resource not fuond", "id", id)
-		return fmt.Errorf("resource identifier '%s' not found", id)
+		logger.V(1).Info("resource not found", "id", id)
+		return nil
 	}
 
 	delete(c.policyList, id)
