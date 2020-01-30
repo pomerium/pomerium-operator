@@ -3,12 +3,15 @@ FROM golang:1.13 as builder
 ENV CGO_ENABLED=0
 ENV GO111MODULE=on
 
-COPY . /build
-
+RUN mkdir /build
 WORKDIR /build
 
-RUN curl -sL https://taskfile.dev/install.sh | sh
+COPY go.mod go.sum /build/
 RUN go mod download
+
+COPY . /build
+
+RUN curl -sL https://taskfile.dev/install.sh | sh
 
 RUN ./bin/task build
 
