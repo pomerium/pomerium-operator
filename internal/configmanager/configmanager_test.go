@@ -139,7 +139,7 @@ func Test_Save(t *testing.T) {
 		{
 			name:    "missing",
 			id:      newIngressResourceIdentifier("absent-ingress"),
-			wantErr: true,
+			wantErr: false,
 		},
 	}
 
