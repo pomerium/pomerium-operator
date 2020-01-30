@@ -91,9 +91,11 @@ var rootCmd = &cobra.Command{
 			return err
 		}
 
-		go configManager.Start()
+		if err := o.Add(configManager); err != nil {
+			return err
+		}
 
-		if err = o.Start(); err != nil {
+		if err := o.Start(); err != nil {
 			logger.Error(err, "operator failed to start.  exiting")
 			return err
 		}

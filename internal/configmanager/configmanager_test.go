@@ -2,6 +2,7 @@ package configmanager
 
 import (
 	"context"
+	"sync"
 	"testing"
 	"time"
 
@@ -232,6 +233,26 @@ func Test_Save_unmarshalError(t *testing.T) {
 
 	cm.baseConfig = garbage
 	assert.Error(t, cm.Save())
+
+}
+
+func Test_SaveLoop(t *testing.T) {
+	cm := NewConfigManager("test", "pomerium", newMockClient(t), time.Nanosecond*1)
+	cm.Set(newIngressResourceIdentifier("test"), []pomeriumconfig.Policy{{To: "foo", From: "bar"}})
+
+	stopCh := make(chan struct{})
+	wg := &sync.WaitGroup{}
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		cm.Start(stopCh) //nolint: errcheck
+	}()
+
+	close(stopCh)
+	wg.Wait()
+	persistedOpts, err := cm.GetPersistedConfig()
+	assert.NoError(t, err)
+	assert.NotEmpty(t, persistedOpts)
 
 }
 
