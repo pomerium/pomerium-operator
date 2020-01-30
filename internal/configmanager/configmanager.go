@@ -174,28 +174,33 @@ func (c *ConfigManager) GetPersistedConfig() (options pomeriumconfig.Options, er
 }
 
 // Start begins the periodic save loop to persist in-memory configuration to the API
-func (c *ConfigManager) Start() {
-	c.saveLoop()
-}
-
-// Stop terminates the periodic save loop
-func (c *ConfigManager) Stop() {
-	c.settleTicker.Stop()
-}
-
-func (c *ConfigManager) saveLoop() {
+func (c *ConfigManager) Start(stopCh <-chan struct{}) error {
 	for {
-		_, ok := <-c.settleTicker.C
-		if c.pendingSave {
-			err := c.Save()
-			if err != nil {
-				log.L.Error(err, "failed to save to configmap", "configmap", c.configMap)
-			}
-		}
-		if !ok {
-			break
+		select {
+		case <-stopCh:
+			c.loopSave()
+			return nil
+		case <-c.settleTicker.C:
+			c.loopSave()
 		}
 	}
+}
+
+func (c *ConfigManager) loopSave() {
+	if c.pendingSave {
+		err := c.Save()
+		if err != nil {
+			log.L.Error(err, "failed to save to configmap", "configmap", c.configMap)
+		}
+	}
+}
+
+// NeedLeaderElection implements manager.LeaderElectionRunnable.
+//
+// When ConfigManager is added to a controller-manager, this delays
+// running Start() until leadership is established
+func (c *ConfigManager) NeedLeaderElection() bool {
+	return true
 }
 
 // ConfigReceiver is called with the stored configuration of the ConfigurationManager
