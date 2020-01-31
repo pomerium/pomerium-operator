@@ -22,7 +22,6 @@ import (
 var mockBaseConfig = pomeriumconfig.Options{
 	InsecureServer:       true,
 	ForwardAuthURLString: "https://nginx-hates-you.beyondcorp.org",
-	Policies:             []pomeriumconfig.Policy{},
 }
 
 func mockBaseConfigBytes(t *testing.T) []byte {
