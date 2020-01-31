@@ -28,6 +28,8 @@ tasks:
       - c.out
     sources:
       - ./**/*.go
+      - ./go.mod
+      - ./go.sum
 
   build:
     desc: Build binary

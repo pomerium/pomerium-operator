@@ -69,3 +69,5 @@ Temporary Items
 coverage.txt
 /pomerium-operator
 /.kubebuilder
+.test*.yaml
+test*.yaml
