@@ -9,7 +9,7 @@ require (
 	github.com/google/go-cmp v0.4.0
 	github.com/iancoleman/strcase v0.0.0-20191112232945-16388991a334
 	github.com/imdario/mergo v0.3.8 // indirect
-	github.com/pomerium/pomerium v0.6.1-0.20200131044139-2d2b16566a9f
+	github.com/pomerium/pomerium v0.6.2
 	github.com/spf13/cobra v0.0.5
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.6.2
