@@ -116,14 +116,14 @@ data:
 
 # Roadmap 
 
-[x] Basic CM update functionality.  Provide enough functionality to implement the Forward Auth deployment model.  Basically this is just policy updates being automated and compatible with the current helm chart.  
+- [x] Basic CM update functionality.  Provide enough functionality to implement the Forward Auth deployment model.  Basically this is just policy updates being automated and compatible with the current helm chart.  
 
-[ ] Introduce a mutating webhook that speaks the 3 forward auth dialects and annotates your Ingress for you.  Maybe introduce this configuration via CRD.
+- [ ] Introduce a mutating webhook that speaks the 3 forward auth dialects and annotates your Ingress for you.  Maybe introduce this configuration via CRD.
 
-[ ] Get "table stakes" Ingress features into pomerium.  Target model is Inverted Double Ingress or Simple Ingress.  We need cert handling up to snuff, but load balancing and path based routing can be offloaded to a next-hop ingress controller or kube-proxy via Service.  CRD maps which "next-hop" service to use for the IDI model from the ingress class.
+- [ ] Get "table stakes" Ingress features into pomerium.  Target model is Inverted Double Ingress or Simple Ingress.  We need cert handling up to snuff, but load balancing and path based routing can be offloaded to a next-hop ingress controller or kube-proxy via Service.  CRD maps which "next-hop" service to use for the IDI model from the ingress class.
 
-[ ]  Introduce backend load balancing via Endpoint discovery to allow for skipping a second ingress for most configurations.
+- [ ]  Introduce backend load balancing via Endpoint discovery to allow for skipping a second ingress for most configurations.
 
-[ ]  Allow non-Ingress/Service based policy via CRD.  Helm chart does conversion on the backend.
+- [ ]  Allow non-Ingress/Service based policy via CRD.  Helm chart does conversion on the backend.
 
-[ ]  Pomerium deployment itself is managed by CRD.  The helm chart becomes a wrapper to this CRD.  Move the templating and resource generation logic into pomerium-operator.
+- [ ]  Pomerium deployment itself is managed by CRD.  The helm chart becomes a wrapper to this CRD.  Move the templating and resource generation logic into pomerium-operator.
