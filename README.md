@@ -28,7 +28,7 @@ https://github.com/pomerium/pomerium/issues/273
 https://github.com/pomerium/pomerium/issues/425
 
 # Installing
-The pomerium operator should be installed with the pomerium helm chart at https://helm.pomerium.io
+The pomerium operator should be installed with the pomerium helm chart at [https://helm.pomerium.io](https://helm.pomerium.io).
 
 It may be run from outside the cluster for development or testing by using your current kubernetes context.
 
