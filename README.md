@@ -30,7 +30,7 @@ https://github.com/pomerium/pomerium/issues/425
 # Installing
 The pomerium operator should be installed with the pomerium helm chart at [https://helm.pomerium.io](https://helm.pomerium.io).
 
-It may be run from outside the cluster for development or testing by using your current kubernetes context.
+The operator may be run from outside the cluster for development or testing.  In this case, it will use the default configuration at `~/.kube/config`, or you may specify a kubeconfig via the `KUBECONFIG` env var.  Your current context from the config will be used in either case.
 
 # Building
 pomerium-operator utilizes [go-task](https://taskfile.dev/#/) for development related tasks.  
