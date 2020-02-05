@@ -74,9 +74,9 @@ apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   annotations:
-    ingress.pomerium.io/allowed_domains: '["beyondcorp.org"]'
-    nginx.ingress.kubernetes.io/auth-signin: https://forwardauth.beyondcorp.org/?uri=$scheme://$host$request_uri
-    nginx.ingress.kubernetes.io/auth-url: https://forwardauth.beyondcorp.org/verify?uri=$scheme://$host$request_uri
+    ingress.pomerium.io/allowed_domains: '["pomerium.io"]'
+    nginx.ingress.kubernetes.io/auth-signin: https://forwardauth.pomerium.io/?uri=$scheme://$host$request_uri
+    nginx.ingress.kubernetes.io/auth-url: https://forwardauth.pomerium.io/verify?uri=$scheme://$host$request_uri
   labels:
     app: grafana
     chart: grafana-4.3.2
@@ -85,7 +85,7 @@ metadata:
   name: prometheus-grafana
 spec:
   rules:
-  - host: grafana.beyondcorp.org
+  - host: grafana.pomerium.io
     http:
       paths:
       - backend:
@@ -97,8 +97,8 @@ spec:
 This ingress:
 
 1. Sets up external auth for nginx-ingress via the `nginx.ingress.kubernetes.io` annotations
-2. Maps `grafana.beyondcorp.org` to the service at `prometheus-grafana`
-3. Permits all users from domain `beyondcorp.org` to access this endpoint
+2. Maps `grafana.pomerium.io` to the service at `prometheus-grafana`
+3. Permits all users from domain `pomerium.io` to access this endpoint
 
 The appropriate policy entry will be generated and injected into the pomerium `ConfigMap`:
 
@@ -107,10 +107,10 @@ apiVersion: v1
 data:
   config.yaml: |
     policy:
-    - from: https://grafana.beyondcorp.org
-      to: https://grafana.beyondcorp.org
+    - from: https://grafana.pomerium.io
+      to: https://grafana.pomerium.io
       allowed_domains:
-       - beyondcorp.org
+       - pomerium.io
 ```
 
 # Roadmap 
