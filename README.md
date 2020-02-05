@@ -113,7 +113,7 @@ data:
 # Development
 
 ## Building
-pomerium-operator utilizes [go-task](https://taskfile.dev/#/) for development related tasks.  
+pomerium-operator utilizes [go-task](https://taskfile.dev/#/) for development related tasks:  
 
 `task build`
 
