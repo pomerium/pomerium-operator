@@ -40,7 +40,7 @@ pomerium-operator utilizes [go-task](https://taskfile.dev/#/) for development re
 # Using
 
 Due to current capabilities, the pomerium-operator is most useful when utilizing [forward auth](https://www.pomerium.io/configuration/#forward-auth).  At this time, you must provide the appropriate annotations
-for your ingress controller to have pomerium protect your endpoint.  Examples can be found in the pomerium documentation.
+for your ingress controller to have pomerium protect your endpoint.  [Examples](https://www.pomerium.io/recipes/kubernetes.html) can be found in the pomerium documentation.
 
 ## How it works
 
