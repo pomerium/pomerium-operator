@@ -10,11 +10,12 @@
 - [About](#about)
   - [Initial discussion](#initial-discussion)
 - [Installing](#installing)
-- [Building](#building)
 - [Using](#using)
   - [How it works](#how-it-works)
   - [Annotations](#annotations)
   - [Example](#example)
+- [Development](#development)
+  - [Building](#building)
 - [Roadmap](#roadmap)
 # About
 
@@ -32,10 +33,6 @@ The pomerium operator should be installed with the pomerium helm chart at [https
 
 The operator may be run from outside the cluster for development or testing.  In this case, it will use the default configuration at `~/.kube/config`, or you may specify a kubeconfig via the `KUBECONFIG` env var.  Your current context from the config will be used in either case.
 
-# Building
-pomerium-operator utilizes [go-task](https://taskfile.dev/#/) for development related tasks.  
-
-`task build`
 
 # Using
 
@@ -112,6 +109,13 @@ data:
       allowed_domains:
        - pomerium.io
 ```
+
+# Development
+
+## Building
+pomerium-operator utilizes [go-task](https://taskfile.dev/#/) for development related tasks.  
+
+`task build`
 
 # Roadmap 
 
