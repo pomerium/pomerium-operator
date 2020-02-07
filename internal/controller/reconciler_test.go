@@ -103,7 +103,7 @@ func fakeObjects() []runtime.Object {
 	objs = append(objs,
 		&networkingv1beta1.Ingress{
 			TypeMeta: metav1.TypeMeta{
-				APIVersion: "networking.k8s.io/v1beta1",
+				APIVersion: "extensions/v1beta1",
 				Kind:       "Ingress",
 			},
 			ObjectMeta: metav1.ObjectMeta{
@@ -116,7 +116,7 @@ func fakeObjects() []runtime.Object {
 	objs = append(objs,
 		&networkingv1beta1.Ingress{
 			TypeMeta: metav1.TypeMeta{
-				APIVersion: "networking.k8s.io/v1beta1",
+				APIVersion: "extensions/v1beta1",
 				Kind:       "Ingress",
 			},
 			ObjectMeta: metav1.ObjectMeta{
@@ -149,7 +149,7 @@ func Test_Reconcile_2(t *testing.T) {
 			name: "add-ingress",
 			obj: &networkingv1beta1.Ingress{
 				TypeMeta: metav1.TypeMeta{
-					APIVersion: "networking.k8s.io/v1beta1",
+					APIVersion: "extensions/v1beta1",
 					Kind:       "Ingress",
 				},
 				ObjectMeta: metav1.ObjectMeta{
