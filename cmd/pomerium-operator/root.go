@@ -29,13 +29,15 @@ var (
 )
 
 type cmdConfig struct {
-	BaseConfigFile      string
-	Debug               bool
-	Election            bool
-	ElectionConfigMap   string
-	ElectionNamespace   string
+	BaseConfigFile    string
+	Debug             bool
+	Election          bool
+	ElectionConfigMap string
+	ElectionNamespace string
+
 	IngressClass        string
 	MetricsAddress      string
+	HealthAddress       string
 	Namespace           string
 	PomeriumConfigMap   string
 	PomeriumNamespace   string
@@ -123,6 +125,7 @@ func init() {
 	rootCmd.PersistentFlags().String("election-configmap", "operator-leader-pomerium", "Name of ConfigMap to use for leader election")
 	rootCmd.PersistentFlags().String("election-namespace", "kube-system", "Namespace to use for leader election")
 	rootCmd.PersistentFlags().String("metrics-address", "0", "Address for metrics listener.  Default disabled")
+	rootCmd.PersistentFlags().String("health-address", "0", "Address for health check endpoint.  Default disabled")
 	rootCmd.PersistentFlags().StringSlice("pomerium-deployments", []string{}, "List of Deployments in the pomerium-namespace to update when the [base-config-file] changes")
 
 	err := bindViper(vcfg, rootCmd.PersistentFlags())
@@ -206,6 +209,7 @@ func createOperator(kcfg *rest.Config) (*operator.Operator, error) {
 			ServiceClass:            operatorCfg.ServiceClass,
 			IngressClass:            operatorCfg.IngressClass,
 			MetricsBindAddress:      operatorCfg.MetricsAddress,
+			HealthAddress:           operatorCfg.HealthAddress,
 			LeaderElection:          operatorCfg.Election,
 			LeaderElectionID:        operatorCfg.ElectionConfigMap,
 			LeaderElectionNamespace: operatorCfg.ElectionNamespace,

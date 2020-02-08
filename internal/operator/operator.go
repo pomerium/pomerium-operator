@@ -1,6 +1,8 @@
 package operator
 
 import (
+	"net/http"
+
 	"github.com/pomerium/pomerium-operator/internal/log"
 	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -12,6 +14,7 @@ import (
 )
 
 var logger = log.L.WithValues("component", "operator")
+var zHandler = func(_ *http.Request) error { return nil }
 
 // Options represents the configuration of an Operator.  Used in NewOperator()
 type Options struct {
@@ -23,6 +26,7 @@ type Options struct {
 	KubeConfig              *rest.Config
 	MapperProvider          func(*rest.Config) (meta.RESTMapper, error)
 	MetricsBindAddress      string
+	HealthAddress           string
 	LeaderElection          bool
 	LeaderElectionID        string
 	LeaderElectionNamespace string
@@ -52,6 +56,7 @@ func NewOperator(opts Options) (*Operator, error) {
 		NewClient:               opts.Client,
 		MapperProvider:          opts.MapperProvider,
 		MetricsBindAddress:      opts.MetricsBindAddress,
+		HealthProbeBindAddress:  opts.HealthAddress,
 	}
 
 	logger.V(1).Info("creating manager for operator")
@@ -62,6 +67,16 @@ func NewOperator(opts Options) (*Operator, error) {
 		return nil, err
 	}
 	logger.V(1).Info("manager created")
+
+	err = mgr.AddHealthzCheck("alive", zHandler)
+	if err != nil {
+		return nil, err
+	}
+
+	err = mgr.AddReadyzCheck("alive", zHandler)
+	if err != nil {
+		return nil, err
+	}
 
 	operator := Operator{opts: opts, mgr: mgr, builder: builder.ControllerManagedBy(mgr), stopCh: opts.StopCh}
 
