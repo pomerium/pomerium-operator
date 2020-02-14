@@ -1,3 +1,5 @@
 .kubebuilder
 pomerium-operator
 **/debug.test
+dist/*
+bin/*

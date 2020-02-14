@@ -1,0 +1,66 @@
+name: Release
+on:
+  release:
+    types:
+      - published
+
+jobs:
+  release-binary:
+    runs-on: ubuntu-latest
+    container:
+      image: "golang:1.13"
+    strategy:
+      matrix:
+        os:
+          - darwin
+          - linux
+        arch:
+          - amd64
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v1.1.0
+
+      - name: Install go-task
+        run: curl -sL https://taskfile.dev/install.sh | sh
+
+      - name: Release
+        run: GOOS=${{ matrix.os }} GOARCH=${{ matrix.arch }} bin/task release
+
+      - name: Upload binaries to release
+        uses: svenstaro/upload-release-action@v1-release
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: dist/*
+          file_glob: true
+          tag: ${{ github.ref }}
+          overwrite: true
+
+  release-docker:
+    needs:
+      - release-binary
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v1.1.0
+
+      - name: Get tag name
+        id: tagName
+        uses: olegtarasov/get-tag@v1
+
+      - name: Docker Publish - Release
+        uses: zenato/docker-action@master
+        continue-on-error: true
+        with:
+          username: ${{ secrets.DOCKERHUB_USER }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          repository: pomerium/pomerium-operator
+          tag: ${{ steps.tagName.outputs.tag }}
+
+      - name: Docker Publish - Latest
+        if: "!contains(steps.tagName.outputs.tag, 'rc')"
+        uses: zenato/docker-action@master
+        with:
+          username: ${{ secrets.DOCKERHUB_USER }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          repository: pomerium/pomerium-operator
+          tag: latest

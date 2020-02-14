@@ -71,3 +71,5 @@ coverage.txt
 /.kubebuilder
 .test*.yaml
 test*.yaml
+/dist/*
+/bin/*
