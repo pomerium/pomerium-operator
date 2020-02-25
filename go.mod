@@ -15,7 +15,7 @@ require (
 	github.com/spf13/cobra v0.0.6
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.6.2
-	github.com/stretchr/testify v1.4.0
+	github.com/stretchr/testify v1.5.1
 	go.uber.org/zap v1.14.0
 	gopkg.in/yaml.v2 v2.2.8
 	k8s.io/api v0.17.3
