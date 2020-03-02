@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"reflect"
+	"regexp"
 	"strings"
 
 	"github.com/pomerium/pomerium-operator/internal/configmanager"
@@ -125,5 +126,13 @@ func (r *Reconciler) newKind() runtime.Object {
 func (r *Reconciler) ControllerClassMatch(meta metav1.Object) bool {
 	annotations := meta.GetAnnotations()
 	class, exists := annotations[r.controllerAnnotation]
-	return (!exists) || (exists && class == r.controllerClass)
+	if !exists || r.controllerClass == class {
+		return true
+	}
+
+	match, err := regexp.MatchString(r.controllerClass, class)
+	if err != nil {
+		logger.Error(err, "could not evaluate controller class match", "pattern", r.controllerClass, "class", class)
+	}
+	return match
 }

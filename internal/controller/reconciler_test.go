@@ -249,3 +249,131 @@ func Test_Reconcile_2(t *testing.T) {
 		})
 	}
 }
+
+func Test_Reconciler_ControllerClassMatch(t *testing.T) {
+	// Helpers
+	buildTestObjWithClassAnnotation := func(typ string, classAnnotation string) runtime.Object {
+		annotations := map[string]string{}
+		if classAnnotation != "" {
+			annotations[fmt.Sprintf("kubernetes.io/%s.class", typ)] = classAnnotation
+		}
+
+		switch typ {
+		case "ingress":
+			return &networkingv1beta1.Ingress{
+				TypeMeta: metav1.TypeMeta{
+					APIVersion: "extensions/v1beta1",
+					Kind:       "Ingress",
+				},
+				ObjectMeta: metav1.ObjectMeta{
+					Name:        "test-ingress",
+					Annotations: annotations,
+				},
+			}
+		case "service":
+			return &corev1.Service{
+				TypeMeta: metav1.TypeMeta{
+					APIVersion: "v1",
+					Kind:       "Service",
+				},
+				ObjectMeta: metav1.ObjectMeta{
+					Name:        "test-service",
+					Annotations: annotations,
+				},
+			}
+		default:
+			return nil
+		}
+	}
+
+	// Test cases
+	testCases := []struct {
+		name            string
+		controllerClass string
+		obj             runtime.Object
+		expectedMatch   bool
+	}{
+		{
+			name:            "should match ingress with unannotated class",
+			controllerClass: "whatever",
+			obj:             buildTestObjWithClassAnnotation("ingress", ""),
+			expectedMatch:   true,
+		},
+		{
+			name:            "should match service with unannotated class",
+			controllerClass: "whatever",
+			obj:             buildTestObjWithClassAnnotation("service", ""),
+			expectedMatch:   true,
+		},
+		{
+			name:            "should match ingress with equal class",
+			controllerClass: "pomerium",
+			obj:             buildTestObjWithClassAnnotation("ingress", "pomerium"),
+			expectedMatch:   true,
+		},
+		{
+			name:            "should match service with equal class",
+			controllerClass: "pomerium",
+			obj:             buildTestObjWithClassAnnotation("service", "pomerium"),
+			expectedMatch:   true,
+		},
+		{
+			name:            "should not match ingress with unequal class",
+			controllerClass: "nginx",
+			obj:             buildTestObjWithClassAnnotation("ingress", "pomerium"),
+			expectedMatch:   false,
+		},
+		{
+			name:            "should not match service with unequal class",
+			controllerClass: "nginx",
+			obj:             buildTestObjWithClassAnnotation("service", "pomerium"),
+			expectedMatch:   false,
+		},
+		{
+			name:            "should match ingress with matching pattern class",
+			controllerClass: "(nginx|pomerium)",
+			obj:             buildTestObjWithClassAnnotation("ingress", "pomerium"),
+			expectedMatch:   true,
+		},
+		{
+			name:            "should match service with matching pattern class",
+			controllerClass: "(nginx|pomerium)",
+			obj:             buildTestObjWithClassAnnotation("service", "pomerium"),
+			expectedMatch:   true,
+		},
+		{
+			name:            "should match ingress with non-matching pattern class",
+			controllerClass: "(nginx|pomerium)",
+			obj:             buildTestObjWithClassAnnotation("ingress", "traefik"),
+			expectedMatch:   false,
+		},
+		{
+			name:            "should match service with non-matching pattern class",
+			controllerClass: "(nginx|pomerium)",
+			obj:             buildTestObjWithClassAnnotation("service", "traefik"),
+			expectedMatch:   false,
+		},
+		{
+			name:            "should not match any ingress when configured with bad matching pattern",
+			controllerClass: ")(",
+			obj:             buildTestObjWithClassAnnotation("ingress", "pomerium"),
+			expectedMatch:   false,
+		},
+		{
+			name:            "should not match any service when configured with bad matching pattern",
+			controllerClass: ")(",
+			obj:             buildTestObjWithClassAnnotation("service", "pomerium"),
+			expectedMatch:   false,
+		},
+	}
+
+	t.Parallel()
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			r := NewReconciler(tc.obj, tc.controllerClass, configmanager.NewConfigManager("", "test", fake.NewFakeClient(), time.Nanosecond*1))
+
+			actualMatch := r.ControllerClassMatch(tc.obj.(metav1.Object))
+			assert.Equal(t, tc.expectedMatch, actualMatch)
+		})
+	}
+}
