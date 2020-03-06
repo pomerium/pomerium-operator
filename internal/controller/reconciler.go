@@ -26,11 +26,12 @@ var logger = log.L.WithValues("component", "reconciler")
 // Reconciler implements a Kubernetes reconciler for either a Service or Ingress resources.  Use NewReconciler() to initialize.
 type Reconciler struct {
 	client.Client
-	controllerAnnotation string
-	controllerClass      string
-	kind                 runtime.Object
-	scheme               *runtime.Scheme
-	configManager        *configmanager.ConfigManager
+	controllerAnnotation  string
+	controllerClass       string
+	controllerClassRegExp *regexp.Regexp
+	kind                  runtime.Object
+	scheme                *runtime.Scheme
+	configManager         *configmanager.ConfigManager
 }
 
 // NewReconciler returns a new Reconciler for obj type Objects.
@@ -126,13 +127,18 @@ func (r *Reconciler) newKind() runtime.Object {
 func (r *Reconciler) ControllerClassMatch(meta metav1.Object) bool {
 	annotations := meta.GetAnnotations()
 	class, exists := annotations[r.controllerAnnotation]
-	if !exists || r.controllerClass == class {
+	if !exists {
 		return true
 	}
 
-	match, err := regexp.MatchString(r.controllerClass, class)
-	if err != nil {
-		logger.Error(err, "could not evaluate controller class match", "pattern", r.controllerClass, "class", class)
+	if r.controllerClassRegExp == nil {
+		controllerClassRegExp, err := regexp.Compile(r.controllerClass)
+		if err != nil {
+			logger.Error(err, "could not compile controller class as regular expression", "pattern", r.controllerClass)
+			return false
+		}
+		r.controllerClassRegExp = controllerClassRegExp
 	}
-	return match
+
+	return r.controllerClassRegExp.MatchString(class)
 }
