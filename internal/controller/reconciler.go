@@ -127,7 +127,7 @@ func (r *Reconciler) newKind() runtime.Object {
 func (r *Reconciler) ControllerClassMatch(meta metav1.Object) bool {
 	annotations := meta.GetAnnotations()
 	class, exists := annotations[r.controllerAnnotation]
-	if !exists {
+	if !exists || r.controllerClass == class {
 		return true
 	}
 
