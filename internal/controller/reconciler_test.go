@@ -24,19 +24,32 @@ import (
 
 func Test_NewReconciler(t *testing.T) {
 	tests := []struct {
-		name  string
-		obj   runtime.Object
-		class string
+		name                         string
+		obj                          runtime.Object
+		class                        string
+		expectedPanic                bool
+		expectedControllerAnnotation string
 	}{
 		{
-			name:  "ingress",
-			obj:   &networkingv1beta1.Ingress{},
-			class: "ingress",
+			name:                         "ingress",
+			obj:                          &networkingv1beta1.Ingress{},
+			class:                        "ingress",
+			expectedPanic:                false,
+			expectedControllerAnnotation: "kubernetes.io/ingress.class",
 		},
 		{
-			name:  "service",
-			obj:   &corev1.Service{},
-			class: "service",
+			name:                         "service",
+			obj:                          &corev1.Service{},
+			class:                        "service",
+			expectedPanic:                false,
+			expectedControllerAnnotation: "kubernetes.io/service.class",
+		},
+		{
+			name:                         "ingress",
+			obj:                          &networkingv1beta1.Ingress{},
+			class:                        ")(",
+			expectedPanic:                true,
+			expectedControllerAnnotation: "kubernetes.io/ingress.class",
 		},
 	}
 
@@ -44,15 +57,20 @@ func Test_NewReconciler(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			fakeClient := fake.NewFakeClient()
+			if tt.expectedPanic {
+				assert.Panics(t, func() {
+					NewReconciler(tt.obj, tt.class, configmanager.NewConfigManager("test", "test", fakeClient, time.Nanosecond*1))
+				})
+				return
+			}
+
 			c := NewReconciler(tt.obj, tt.class, configmanager.NewConfigManager("test", "test", fakeClient, time.Nanosecond*1))
 			assert.NoError(t, c.InjectClient(fakeClient))
 			assert.Equal(t, c.kind, tt.obj)
-			assert.Equal(t, c.controllerClass, tt.class)
-			assert.Equal(t, c.controllerAnnotation, fmt.Sprintf("kubernetes.io/%s.class", tt.class))
-
+			assert.NotNil(t, c.controllerClassRegExp)
+			assert.Equal(t, c.controllerAnnotation, tt.expectedControllerAnnotation)
 		})
 	}
-
 }
 
 func Test_Reconcile(t *testing.T) {
@@ -351,18 +369,6 @@ func Test_Reconciler_ControllerClassMatch(t *testing.T) {
 			name:            "should match service with non-matching pattern class",
 			controllerClass: "(nginx|pomerium)",
 			obj:             buildTestObjWithClassAnnotation("service", "traefik"),
-			expectedMatch:   false,
-		},
-		{
-			name:            "should not match any ingress when configured with bad matching pattern",
-			controllerClass: ")(",
-			obj:             buildTestObjWithClassAnnotation("ingress", "pomerium"),
-			expectedMatch:   false,
-		},
-		{
-			name:            "should not match any service when configured with bad matching pattern",
-			controllerClass: ")(",
-			obj:             buildTestObjWithClassAnnotation("service", "pomerium"),
 			expectedMatch:   false,
 		},
 	}

@@ -27,7 +27,6 @@ var logger = log.L.WithValues("component", "reconciler")
 type Reconciler struct {
 	client.Client
 	controllerAnnotation  string
-	controllerClass       string
 	controllerClassRegExp *regexp.Regexp
 	kind                  runtime.Object
 	scheme                *runtime.Scheme
@@ -42,7 +41,7 @@ type Reconciler struct {
 func NewReconciler(obj runtime.Object, controllerClass string, configManager *configmanager.ConfigManager) *Reconciler {
 	r := &Reconciler{}
 	r.kind = obj
-	r.controllerClass = controllerClass
+	r.controllerClassRegExp = regexp.MustCompile(controllerClass)
 	r.scheme = scheme.Scheme
 	r.configManager = configManager
 
@@ -127,17 +126,8 @@ func (r *Reconciler) newKind() runtime.Object {
 func (r *Reconciler) ControllerClassMatch(meta metav1.Object) bool {
 	annotations := meta.GetAnnotations()
 	class, exists := annotations[r.controllerAnnotation]
-	if !exists || r.controllerClass == class {
+	if !exists {
 		return true
-	}
-
-	if r.controllerClassRegExp == nil {
-		controllerClassRegExp, err := regexp.Compile(r.controllerClass)
-		if err != nil {
-			logger.Error(err, "could not compile controller class as regular expression", "pattern", r.controllerClass)
-			return false
-		}
-		r.controllerClassRegExp = controllerClassRegExp
 	}
 
 	return r.controllerClassRegExp.MatchString(class)
