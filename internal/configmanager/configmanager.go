@@ -21,7 +21,7 @@ var logger = log.L.WithValues("component", "configmanager")
 
 const configKey = "config.yaml"
 
-// ConfigManager tracks policy groups related to a given ResourceIdentifier and handles update to a Pomerium ConfigMap via the API server
+// ConfigManager tracks policy groups related to a given ResourceIdentifier and handles update to a Pomerium config Secret via the API server
 //
 // ConfigManager accepts a baseConfig which will be merged into the persisted configuration
 //
@@ -29,7 +29,7 @@ const configKey = "config.yaml"
 // persist the configuration.
 type ConfigManager struct {
 	namespace    string
-	configMap    string
+	secret       string
 	client       client.Client
 	mutex        sync.RWMutex
 	policyList   map[ResourceIdentifier][]pomeriumconfig.Policy
@@ -39,12 +39,12 @@ type ConfigManager struct {
 	onSaves      []ConfigReceiver
 }
 
-// NewConfigManager returns a ConfigManager which uses client to update configMap in namespace at settlePeriod interval if
+// NewConfigManager returns a ConfigManager which uses client to update secret in namespace at settlePeriod interval if
 // running the save loop via Start()
-func NewConfigManager(namespace string, configMap string, client client.Client, settlePeriod time.Duration) *ConfigManager {
+func NewConfigManager(namespace string, secret string, client client.Client, settlePeriod time.Duration) *ConfigManager {
 	return &ConfigManager{
 		namespace:    namespace,
-		configMap:    configMap,
+		secret:       secret,
 		client:       client,
 		policyList:   make(map[ResourceIdentifier][]pomeriumconfig.Policy),
 		settleTicker: time.NewTicker(settlePeriod),
@@ -84,7 +84,7 @@ func (c *ConfigManager) Remove(id ResourceIdentifier) error {
 
 // Save immediately flushes the current configuration to the API server
 func (c *ConfigManager) Save() error {
-	logger.V(1).Info("saving ConfigMap")
+	logger.V(1).Info("saving config Secret")
 
 	var tmpOptions pomeriumconfig.Options
 
@@ -93,10 +93,10 @@ func (c *ConfigManager) Save() error {
 		return fmt.Errorf("could not render current config: %w", err)
 	}
 
-	// Make sure we can load the target configmap
-	configObj := &corev1.ConfigMap{}
-	if err := c.client.Get(context.Background(), types.NamespacedName{Name: c.configMap, Namespace: c.namespace}, configObj); err != nil {
-		err = fmt.Errorf("output configmap not found: %w", err)
+	// Make sure we can load the target secret
+	secretObj := &corev1.Secret{}
+	if err := c.client.Get(context.Background(), types.NamespacedName{Name: c.secret, Namespace: c.namespace}, secretObj); err != nil {
+		err = fmt.Errorf("output secret not found: %w", err)
 		return err
 	}
 
@@ -105,16 +105,16 @@ func (c *ConfigManager) Save() error {
 		return fmt.Errorf("could not serialize config: %w", err)
 	}
 
-	configObj.Data = map[string]string{configKey: string(configBytes)}
+	secretObj.Data = map[string][]byte{configKey: configBytes}
 
 	// TODO set deadline?
 	// TODO use context from save?
-	err = c.client.Update(context.Background(), configObj)
+	err = c.client.Update(context.Background(), secretObj)
 	if err != nil {
-		return fmt.Errorf("failed to update configmap: %w", err)
+		return fmt.Errorf("failed to update secret: %w", err)
 	}
 
-	logger.Info("successfully saved ConfigMap")
+	logger.Info("successfully saved Secret")
 	c.callOnSaves(tmpOptions)
 	c.pendingSave = false
 	return nil
@@ -161,12 +161,12 @@ func (c *ConfigManager) GetCurrentConfig() (options pomeriumconfig.Options, err 
 
 // GetPersistedConfig retrieves the currently persisted config from the API server
 func (c *ConfigManager) GetPersistedConfig() (options pomeriumconfig.Options, err error) {
-	configObj := &corev1.ConfigMap{}
-	if err = c.client.Get(context.Background(), types.NamespacedName{Name: c.configMap, Namespace: c.namespace}, configObj); err != nil {
-		return options, fmt.Errorf("output configmap not found: %w", err)
+	secretObj := &corev1.Secret{}
+	if err = c.client.Get(context.Background(), types.NamespacedName{Name: c.secret, Namespace: c.namespace}, secretObj); err != nil {
+		return options, fmt.Errorf("output secret not found: %w", err)
 	}
 
-	if err = yaml.Unmarshal([]byte(configObj.Data[configKey]), &options); err != nil {
+	if err = yaml.Unmarshal([]byte(secretObj.Data[configKey]), &options); err != nil {
 		return options, fmt.Errorf("could not unmarshal config: %w", err)
 	}
 
@@ -192,7 +192,7 @@ func (c *ConfigManager) loopSave() {
 	if c.pendingSave {
 		err := c.Save()
 		if err != nil {
-			log.L.Error(err, "failed to save to configmap", "configmap", c.configMap)
+			log.L.Error(err, "failed to save to secret", "secret", c.secret)
 		}
 	}
 }

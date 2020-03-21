@@ -21,7 +21,7 @@ type Options struct {
 	NameSpace               string
 	ServiceClass            string
 	IngressClass            string
-	ConfigMap               string
+	Secret                  string
 	Client                  manager.NewClientFunc
 	KubeConfig              *rest.Config
 	MapperProvider          func(*rest.Config) (meta.RESTMapper, error)

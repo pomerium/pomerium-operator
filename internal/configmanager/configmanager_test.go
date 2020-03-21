@@ -35,14 +35,14 @@ func mockBaseConfigBytes(t *testing.T) []byte {
 
 func newMockClient(t *testing.T) client.Client {
 
-	configMap := &corev1.ConfigMap{
+	secret := &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "pomerium",
 			Namespace: "test",
 		},
-		Data: make(map[string]string),
+		Data: make(map[string][]byte),
 	}
-	client := fake.NewFakeClient(configMap)
+	client := fake.NewFakeClient(secret)
 	return client
 }
 
@@ -165,12 +165,12 @@ func Test_Save(t *testing.T) {
 		})
 	}
 
-	configMap := &corev1.ConfigMap{}
-	err = client.Get(context.Background(), types.NamespacedName{Name: cm.configMap, Namespace: cm.namespace}, configMap)
-	assert.NoError(t, err, "failed to get configMap")
+	secret := &corev1.Secret{}
+	err = client.Get(context.Background(), types.NamespacedName{Name: cm.secret, Namespace: cm.namespace}, secret)
+	assert.NoError(t, err, "failed to get secret")
 
 	resultOptions := pomeriumconfig.Options{}
-	configBytes := []byte(configMap.Data[configKey])
+	configBytes := []byte(secret.Data[configKey])
 	err = yaml.Unmarshal(configBytes, &resultOptions)
 	assert.NoError(t, err, "failed to unmarshal resulting config")
 

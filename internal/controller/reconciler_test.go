@@ -135,7 +135,7 @@ func fakeObjects() []runtime.Object {
 
 func Test_Reconcile_2(t *testing.T) {
 
-	testConfigMap := corev1.ConfigMap{
+	testSecret := corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "test",
 			Namespace: "test",
@@ -205,7 +205,7 @@ func Test_Reconcile_2(t *testing.T) {
 				Name:      tt.obj.(metav1.Object).GetName(),
 			}
 
-			c := fake.NewFakeClient(&testConfigMap)
+			c := fake.NewFakeClient(&testSecret)
 			cm := configmanager.NewConfigManager("test", "test", c, time.Nanosecond*1)
 			r := NewReconciler(tt.obj, "pomerium", cm)
 			err := r.InjectClient(c)
