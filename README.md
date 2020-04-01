@@ -97,11 +97,11 @@ This ingress:
 2. Maps `grafana.pomerium.io` to the service at `prometheus-grafana`
 3. Permits all users from domain `pomerium.io` to access this endpoint
 
-The appropriate policy entry will be generated and injected into the pomerium `ConfigMap`:
+The appropriate policy entry will be generated and injected into the pomerium config `Secret`:
 
 ```yaml
 apiVersion: v1
-data:
+stringData:
   config.yaml: |
     policy:
     - from: https://grafana.pomerium.io

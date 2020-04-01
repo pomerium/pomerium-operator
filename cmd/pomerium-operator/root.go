@@ -39,7 +39,7 @@ type cmdConfig struct {
 	MetricsAddress      string
 	HealthAddress       string
 	Namespace           string
-	PomeriumConfigMap   string
+	PomeriumSecret      string
 	PomeriumNamespace   string
 	PomeriumDeployments []string
 	ServiceClass        string
@@ -114,7 +114,7 @@ func main() {
 func init() {
 	rootCmd.PersistentFlags().Bool("debug", false, "Run in debug mode")
 	rootCmd.PersistentFlags().StringP("namespace", "n", "", "Namespaces to monitor")
-	rootCmd.PersistentFlags().String("pomerium-configmap", "pomerium", "Name of pomerium ConfigMap to maintain")
+	rootCmd.PersistentFlags().String("pomerium-secret", "pomerium", "Name of pomerium Secret to maintain")
 	rootCmd.PersistentFlags().String("pomerium-namespace", "kube-system", "Name of pomerium ConfigMap to maintain")
 	rootCmd.PersistentFlags().String("base-config-file", "./pomerium-base.yaml", "Path to base configuration file")
 
@@ -154,7 +154,7 @@ func newRestClient(config *rest.Config) (client.Client, error) {
 
 func newConfigManager(kClient client.Client) (cm *configmanager.ConfigManager, err error) {
 	baseConfigFile := operatorCfg.BaseConfigFile
-	cm = configmanager.NewConfigManager(operatorCfg.PomeriumNamespace, operatorCfg.PomeriumConfigMap, kClient, time.Second*10)
+	cm = configmanager.NewConfigManager(operatorCfg.PomeriumNamespace, operatorCfg.PomeriumSecret, kClient, time.Second*10)
 
 	baseBytes, err := ioutil.ReadFile(baseConfigFile)
 	if err != nil {
