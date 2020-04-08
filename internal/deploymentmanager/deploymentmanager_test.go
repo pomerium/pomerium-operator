@@ -89,7 +89,7 @@ func Test_UpdateDeployments(t *testing.T) {
 
 			// wantErr stands in for "no update expected"
 			if !tt.wantErr {
-				wantedAnnotations[deploymentConfigAnnotation] = checksummedConfig.Checksum()
+				wantedAnnotations[deploymentConfigAnnotation] = fmt.Sprintf("%x", checksummedConfig.Checksum())
 			}
 			assert.Equal(t, wantedAnnotations, updatedDeployment.Spec.Template.Annotations)
 

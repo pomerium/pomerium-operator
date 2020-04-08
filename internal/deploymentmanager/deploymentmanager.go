@@ -2,6 +2,7 @@ package deploymentmanager
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/pomerium/pomerium-operator/internal/log"
 	pomeriumconfig "github.com/pomerium/pomerium/config"
@@ -38,7 +39,7 @@ func (d *DeploymentManager) UpdateDeployments(config pomeriumconfig.Options) {
 	// Policy is dynamic - clear it
 	config.Policies = make([]pomeriumconfig.Policy, 0)
 
-	checksum := config.Checksum()
+	checksum := fmt.Sprintf("%x", config.Checksum())
 
 	logger.V(1).Info("received deployment update", "checksum", checksum)
 
