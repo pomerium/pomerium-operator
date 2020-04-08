@@ -104,8 +104,8 @@ func Test_policyFromObj(t *testing.T) {
 		{
 			name: "service-https",
 			wantPolicy: []pomeriumconfig.Policy{
-				{To: "https://test-service.default.svc.cluster.local:443", From: "https://test.lan.beyondcorp.org", AllowedEmails: []string{"user@beyondcorp.org"}},
-				{To: "https://test-service.default.svc.cluster.local:9000", From: "https://test.lan.beyondcorp.org", AllowedEmails: []string{"user@beyondcorp.org"}},
+				{To: "https://test-service.default.svc.cluster.local:443", From: "https://test.lan.beyondcorp.org", AllowedUsers: []string{"user@beyondcorp.org"}},
+				{To: "https://test-service.default.svc.cluster.local:9000", From: "https://test.lan.beyondcorp.org", AllowedUsers: []string{"user@beyondcorp.org"}},
 			},
 			obj: func() runtime.Object {
 				o := &corev1.Service{}
