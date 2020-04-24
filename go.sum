@@ -383,6 +383,8 @@ github.com/pomerium/pomerium v0.6.1-0.20200131044139-2d2b16566a9f h1:lYwcLKKxPVo
 github.com/pomerium/pomerium v0.6.1-0.20200131044139-2d2b16566a9f/go.mod h1:RbcrdeBg6vzw5L05rnwfy1XNfcqgJ1pXTf50tXwgA00=
 github.com/pomerium/pomerium v0.7.1 h1:/s7JuBFFY7syq1qx14laPIpsIyk6PbA0ajlDCQGA5HI=
 github.com/pomerium/pomerium v0.7.1/go.mod h1:b9qegbSHieMCl0vIxpcoAGzkgD5H0bcCkAbnrw0Chxg=
+github.com/pomerium/pomerium v0.7.5 h1:qdnqmx7rBBA7pb/IPgpqFdaO/OGQoJXii/HNWD+/EGM=
+github.com/pomerium/pomerium v0.7.5/go.mod h1:f8Kfw3Mk0Gtuimru0JRUB729mi9I8I7pSehbuGW4BYw=
 github.com/posener/complete v1.1.1/go.mod h1:em0nMJCgc9GFtwrmVmEMR/ZL6WyhyjMBndrE9hABlRI=
 github.com/pquerna/cachecontrol v0.0.0-20171018203845-0dec1b30a021/go.mod h1:prYjPmNq4d1NPVmpShWobRqXY3q7Vp+80DqgxxUrUIA=
 github.com/pquerna/cachecontrol v0.0.0-20180517163645-1555304b9b35/go.mod h1:prYjPmNq4d1NPVmpShWobRqXY3q7Vp+80DqgxxUrUIA=
@@ -747,6 +749,8 @@ google.golang.org/grpc v1.26.0 h1:2dTRdpdFEEhJYQD8EMLB61nnrzSCTbG38PhqdhvOltg=
 google.golang.org/grpc v1.26.0/go.mod h1:qbnxyOmOxrQa7FizSgH+ReBfzJrCY1pSN7KXBS8abTk=
 google.golang.org/grpc v1.27.0 h1:rRYRFMVgRv6E0D70Skyfsr28tDXIuuPZyWGMPdMcnXg=
 google.golang.org/grpc v1.27.0/go.mod h1:qbnxyOmOxrQa7FizSgH+ReBfzJrCY1pSN7KXBS8abTk=
+google.golang.org/grpc v1.27.1 h1:zvIju4sqAGvwKspUQOhwnpcqSbzi7/H6QomNNjTL4sk=
+google.golang.org/grpc v1.27.1/go.mod h1:qbnxyOmOxrQa7FizSgH+ReBfzJrCY1pSN7KXBS8abTk=
 gopkg.in/alecthomas/kingpin.v2 v2.2.6/go.mod h1:FMv+mEhP44yOT+4EoQTLFTRgOQ1FBLkstjWtayDeSgw=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 h1:qIbj1fsPNlZgppZ+VLlY7N33q108Sa+fhmuc+sWQYwY=
