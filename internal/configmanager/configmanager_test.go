@@ -217,10 +217,10 @@ func Test_Save(t *testing.T) {
 
 }
 
-func Test_Save_clientError(t *testing.T) {
+func Test_Save_create(t *testing.T) {
 
 	cm := NewConfigManager("test", "pomerium", fake.NewFakeClient(), time.Nanosecond*1)
-	assert.Error(t, cm.Save())
+	assert.NoError(t, cm.Save())
 
 }
 
@@ -289,6 +289,6 @@ func Test_OnSave(t *testing.T) {
 	err = cm.Save()
 
 	assert.NoError(t, err)
-	assert.Equal(t, 3, callback.called)
+	assert.Equal(t, 1, callback.called)
 	assert.Empty(t, cmp.Diff(persistedConfig, callback.calledConfig, cmpopts.IgnoreUnexported(pomeriumconfig.Options{})))
 }
