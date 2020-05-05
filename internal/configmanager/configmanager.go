@@ -6,15 +6,14 @@ import (
 	"sync"
 	"time"
 
-	"gopkg.in/yaml.v2"
-	"k8s.io/apimachinery/pkg/types"
-
-	corev1 "k8s.io/api/core/v1"
-
 	"github.com/pomerium/pomerium-operator/internal/log"
-
 	pomeriumconfig "github.com/pomerium/pomerium/config"
+	"gopkg.in/yaml.v2"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
 
 var logger = log.L.WithValues("component", "configmanager")
@@ -35,7 +34,6 @@ type ConfigManager struct {
 	policyList   map[ResourceIdentifier][]pomeriumconfig.Policy
 	baseConfig   []byte
 	settleTicker *time.Ticker
-	pendingSave  bool
 	onSaves      []ConfigReceiver
 }
 
@@ -48,7 +46,6 @@ func NewConfigManager(namespace string, secret string, client client.Client, set
 		client:       client,
 		policyList:   make(map[ResourceIdentifier][]pomeriumconfig.Policy),
 		settleTicker: time.NewTicker(settlePeriod),
-		pendingSave:  true,
 	}
 }
 
@@ -61,7 +58,6 @@ func (c *ConfigManager) Set(id ResourceIdentifier, policy []pomeriumconfig.Polic
 
 	c.policyList[id] = policy
 	logger.Info("set policy for resource", "id", id)
-	c.pendingSave = true
 }
 
 // Remove Deletes the list of policies associated with a given ResourceIdentifier id
@@ -78,13 +74,12 @@ func (c *ConfigManager) Remove(id ResourceIdentifier) error {
 
 	delete(c.policyList, id)
 	logger.Info("removed policy for resource", "id", id)
-	c.pendingSave = true
 	return nil
 }
 
 // Save immediately flushes the current configuration to the API server
 func (c *ConfigManager) Save() error {
-	logger.V(1).Info("saving config Secret")
+	logger.V(1).Info("updating config Secret")
 
 	var tmpOptions pomeriumconfig.Options
 
@@ -93,30 +88,27 @@ func (c *ConfigManager) Save() error {
 		return fmt.Errorf("could not render current config: %w", err)
 	}
 
-	// Make sure we can load the target secret
-	secretObj := &corev1.Secret{}
-	if err := c.client.Get(context.Background(), types.NamespacedName{Name: c.secret, Namespace: c.namespace}, secretObj); err != nil {
-		err = fmt.Errorf("output secret not found: %w", err)
-		return err
-	}
+	secretObj := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: c.secret, Namespace: c.namespace}}
+	op, err := controllerutil.CreateOrUpdate(context.TODO(), c.client, secretObj, func() error {
+		configBytes, err := yaml.Marshal(tmpOptions)
+		if err != nil {
+			return fmt.Errorf("could not serialize config: %w", err)
+		}
 
-	configBytes, err := yaml.Marshal(tmpOptions)
-	if err != nil {
-		return fmt.Errorf("could not serialize config: %w", err)
-	}
+		secretObj.Data = map[string][]byte{configKey: configBytes}
+		return nil
+	})
 
-	secretObj.Data = map[string][]byte{configKey: configBytes}
-
-	// TODO set deadline?
-	// TODO use context from save?
-	err = c.client.Update(context.Background(), secretObj)
 	if err != nil {
 		return fmt.Errorf("failed to update secret: %w", err)
 	}
 
-	logger.Info("successfully saved Secret")
-	c.callOnSaves(tmpOptions)
-	c.pendingSave = false
+	logger.WithValues("operation", op).V(1).Info("update config Secret result")
+
+	if op == controllerutil.OperationResultUpdated || op == controllerutil.OperationResultCreated {
+		logger.Info("successfully saved Secret")
+		c.callOnSaves(tmpOptions)
+	}
 	return nil
 }
 
@@ -189,11 +181,9 @@ func (c *ConfigManager) Start(stopCh <-chan struct{}) error {
 }
 
 func (c *ConfigManager) loopSave() {
-	if c.pendingSave {
-		err := c.Save()
-		if err != nil {
-			log.L.Error(err, "failed to save to secret", "secret", c.secret)
-		}
+	err := c.Save()
+	if err != nil {
+		log.L.Error(err, "failed to save to secret", "secret", c.secret)
 	}
 }
 
