@@ -105,7 +105,7 @@ stringData:
   config.yaml: |
     policy:
     - from: https://grafana.pomerium.io
-      to: https://grafana.pomerium.io
+      to: http://grafana.default.svc.cluster.local:80
       allowed_domains:
        - pomerium.io
 ```
