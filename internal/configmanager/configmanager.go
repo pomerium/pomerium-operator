@@ -3,6 +3,7 @@ package configmanager
 import (
 	"context"
 	"fmt"
+	"sort"
 	"sync"
 	"time"
 
@@ -143,9 +144,27 @@ func (c *ConfigManager) GetCurrentConfig() (options pomeriumconfig.Options, err 
 		return options, fmt.Errorf("could not load base configuration: %w", err)
 	}
 
-	// Attach policies
-	for _, policy := range c.policyList {
-		options.Policies = append(options.Policies, policy...)
+	// Sort identifiers to return a consistent policy
+	var policyIds []ResourceIdentifier
+	for id := range c.policyList {
+		policyIds = append(policyIds, id)
+	}
+
+	sort.Slice(policyIds, func(i, j int) bool {
+
+		switch {
+		case policyIds[i].NamespacedName.String() < policyIds[j].NamespacedName.String():
+			return true
+		case policyIds[i].NamespacedName.String() > policyIds[j].NamespacedName.String():
+			return false
+
+		}
+		return policyIds[i].GVK.String() < policyIds[j].GVK.String()
+	})
+
+	// Append policies in order
+	for _, id := range policyIds {
+		options.Policies = append(options.Policies, c.policyList[id]...)
 	}
 
 	return
