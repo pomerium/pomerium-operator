@@ -8,7 +8,7 @@ jobs:
   release-binary:
     runs-on: ubuntu-latest
     container:
-      image: "golang:1.13"
+      image: "golang:1.14"
     strategy:
       matrix:
         os:
