@@ -13,7 +13,7 @@ jobs:
     env:
       CC_TEST_REPORTER_ID: e00c0ed949f5e40a348d609012867727924fc02dc8257004e76e54726fc55e60
     container:
-      image: "golang:1.13"
+      image: "golang:1.14"
     steps:
       - name: Check out code
         uses: actions/checkout@v1.1.0
@@ -52,7 +52,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container:
-      image: "golang:1.13"
+      image: "golang:1.14"
     steps:
       - name: Check out code
         uses: actions/checkout@v1.1.0

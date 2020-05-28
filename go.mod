@@ -1,6 +1,6 @@
 module github.com/pomerium/pomerium-operator
 
-go 1.13
+go 1.14
 
 require (
 	github.com/ghodss/yaml v1.0.0
