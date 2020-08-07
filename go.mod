@@ -13,7 +13,7 @@ require (
 	github.com/pomerium/pomerium v0.8.1-0.20200528203734-49db9867d72f
 	github.com/spf13/cobra v1.0.0
 	github.com/spf13/pflag v1.0.5
-	github.com/spf13/viper v1.7.0
+	github.com/spf13/viper v1.7.1
 	github.com/stretchr/testify v1.5.1
 	go.uber.org/zap v1.15.0
 	gopkg.in/yaml.v2 v2.3.0
