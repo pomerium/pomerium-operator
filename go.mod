@@ -6,15 +6,15 @@ require (
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-logr/logr v0.1.0
 	github.com/go-logr/zapr v0.1.1
-	github.com/google/go-cmp v0.5.0
+	github.com/google/go-cmp v0.5.1
 	github.com/google/gofuzz v1.1.0 // indirect
 	github.com/iancoleman/strcase v0.0.0-20191112232945-16388991a334
 	github.com/imdario/mergo v0.3.8 // indirect
-	github.com/pomerium/pomerium v0.8.1-0.20200528203734-49db9867d72f
+	github.com/pomerium/pomerium v0.10.0
 	github.com/spf13/cobra v1.0.0
 	github.com/spf13/pflag v1.0.5
-	github.com/spf13/viper v1.7.0
-	github.com/stretchr/testify v1.5.1
+	github.com/spf13/viper v1.7.1
+	github.com/stretchr/testify v1.6.1
 	go.uber.org/zap v1.15.0
 	gopkg.in/yaml.v2 v2.3.0
 	k8s.io/api v0.17.3
