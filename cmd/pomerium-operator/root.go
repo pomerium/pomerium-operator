@@ -116,7 +116,7 @@ func init() {
 	rootCmd.PersistentFlags().Bool("debug", false, "Run in debug mode")
 	rootCmd.PersistentFlags().StringP("namespace", "n", "", "Namespaces to monitor")
 	rootCmd.PersistentFlags().String("pomerium-secret", "pomerium", "Name of pomerium Secret to maintain")
-	rootCmd.PersistentFlags().String("pomerium-namespace", "kube-system", "Name of pomerium ConfigMap to maintain")
+	rootCmd.PersistentFlags().String("pomerium-namespace", "kube-system", "Namespace pomerium Secret to maintain")
 	rootCmd.PersistentFlags().String("base-config-file", "./pomerium-base.yaml", "Path to base configuration file")
 
 	rootCmd.PersistentFlags().StringP("service-class", "s", "pomerium", "kubernetes.io/service.class to monitor")
