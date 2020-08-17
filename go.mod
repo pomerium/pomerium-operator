@@ -9,7 +9,7 @@ require (
 	github.com/go-redis/redis/v7 v7.3.0 // indirect
 	github.com/google/go-cmp v0.5.1
 	github.com/google/gofuzz v1.1.0 // indirect
-	github.com/iancoleman/strcase v0.0.0-20191112232945-16388991a334
+	github.com/iancoleman/strcase v0.1.0
 	github.com/imdario/mergo v0.3.8 // indirect
 	github.com/pomerium/autocache v0.0.0-20200505053831-8c1cd659f055 // indirect
 	github.com/pomerium/pomerium v0.10.1-0.20200807184328-fbb367d39320
