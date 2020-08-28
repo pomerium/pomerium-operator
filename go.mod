@@ -4,7 +4,7 @@ go 1.14
 
 require (
 	github.com/ghodss/yaml v1.0.0
-	github.com/go-logr/logr v0.1.0
+	github.com/go-logr/logr v0.2.0
 	github.com/go-logr/zapr v0.1.1
 	github.com/go-redis/redis/v7 v7.3.0 // indirect
 	github.com/google/go-cmp v0.5.1
