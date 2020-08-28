@@ -12,7 +12,7 @@ require (
 	github.com/iancoleman/strcase v0.1.0
 	github.com/imdario/mergo v0.3.8 // indirect
 	github.com/pomerium/autocache v0.0.0-20200505053831-8c1cd659f055 // indirect
-	github.com/pomerium/pomerium v0.10.1-0.20200807184328-fbb367d39320
+	github.com/pomerium/pomerium v0.10.2
 	github.com/spf13/cobra v1.0.0
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.7.1
