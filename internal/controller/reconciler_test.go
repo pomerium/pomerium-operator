@@ -360,13 +360,13 @@ func Test_Reconciler_ControllerClassMatch(t *testing.T) {
 			expectedMatch:   true,
 		},
 		{
-			name:            "should match ingress with non-matching pattern class",
+			name:            "should not match ingress with non-matching pattern class",
 			controllerClass: "(nginx|pomerium)",
 			obj:             buildTestObjWithClassAnnotation("ingress", "traefik"),
 			expectedMatch:   false,
 		},
 		{
-			name:            "should match service with non-matching pattern class",
+			name:            "should not match service with non-matching pattern class",
 			controllerClass: "(nginx|pomerium)",
 			obj:             buildTestObjWithClassAnnotation("service", "traefik"),
 			expectedMatch:   false,
