@@ -27,6 +27,7 @@ var logger = log.L.WithValues("component", "reconciler")
 type Reconciler struct {
 	client.Client
 	controllerAnnotation  string
+	controllerClass       string
 	controllerClassRegExp *regexp.Regexp
 	kind                  runtime.Object
 	scheme                *runtime.Scheme
@@ -41,9 +42,12 @@ type Reconciler struct {
 func NewReconciler(obj runtime.Object, controllerClass string, configManager *configmanager.ConfigManager) *Reconciler {
 	r := &Reconciler{}
 	r.kind = obj
-	r.controllerClassRegExp = regexp.MustCompile(controllerClass)
 	r.scheme = scheme.Scheme
 	r.configManager = configManager
+	r.controllerClass = controllerClass
+	if strings.HasPrefix(controllerClass, "/") && strings.HasSuffix(controllerClass, "/") {
+		r.controllerClassRegExp = regexp.MustCompile(controllerClass[1 : len(controllerClass)-1])
+	}
 
 	gkv, err := apiutil.GVKForObject(obj, scheme.Scheme)
 	if err != nil {
@@ -130,5 +134,9 @@ func (r *Reconciler) ControllerClassMatch(meta metav1.Object) bool {
 		return true
 	}
 
-	return r.controllerClassRegExp.MatchString(class)
+	if r.controllerClassRegExp != nil {
+		return r.controllerClassRegExp.MatchString(class)
+	}
+
+	return r.controllerClass == class
 }
