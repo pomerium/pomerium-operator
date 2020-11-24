@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"testing"
 	"time"
 
@@ -28,6 +29,7 @@ func Test_NewReconciler(t *testing.T) {
 		obj                          runtime.Object
 		class                        string
 		expectedPanic                bool
+		expectedClassRegExp          *regexp.Regexp
 		expectedControllerAnnotation string
 	}{
 		{
@@ -35,6 +37,7 @@ func Test_NewReconciler(t *testing.T) {
 			obj:                          &networkingv1beta1.Ingress{},
 			class:                        "ingress",
 			expectedPanic:                false,
+			expectedClassRegExp:          nil,
 			expectedControllerAnnotation: "kubernetes.io/ingress.class",
 		},
 		{
@@ -42,13 +45,23 @@ func Test_NewReconciler(t *testing.T) {
 			obj:                          &corev1.Service{},
 			class:                        "service",
 			expectedPanic:                false,
+			expectedClassRegExp:          nil,
 			expectedControllerAnnotation: "kubernetes.io/service.class",
 		},
 		{
 			name:                         "ingress",
 			obj:                          &networkingv1beta1.Ingress{},
-			class:                        ")(",
+			class:                        "/nginx|pomerium/",
+			expectedPanic:                false,
+			expectedClassRegExp:          regexp.MustCompile("nginx|pomerium"),
+			expectedControllerAnnotation: "kubernetes.io/ingress.class",
+		},
+		{
+			name:                         "ingress",
+			obj:                          &networkingv1beta1.Ingress{},
+			class:                        "/)(/",
 			expectedPanic:                true,
+			expectedClassRegExp:          nil,
 			expectedControllerAnnotation: "kubernetes.io/ingress.class",
 		},
 	}
@@ -67,7 +80,8 @@ func Test_NewReconciler(t *testing.T) {
 			c := NewReconciler(tt.obj, tt.class, configmanager.NewConfigManager("test", "test", fakeClient, time.Nanosecond*1))
 			assert.NoError(t, c.InjectClient(fakeClient))
 			assert.Equal(t, c.kind, tt.obj)
-			assert.NotNil(t, c.controllerClassRegExp)
+			assert.Equal(t, c.controllerClass, tt.class)
+			assert.Equal(t, c.controllerClassRegExp, tt.expectedClassRegExp)
 			assert.Equal(t, c.controllerAnnotation, tt.expectedControllerAnnotation)
 		})
 	}
