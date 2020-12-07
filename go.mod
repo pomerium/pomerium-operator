@@ -31,7 +31,7 @@ require (
 	golang.org/x/tools v0.0.0-20200616133436-c1934b75d054 // indirect
 	gomodules.xyz/jsonpatch/v2 v2.1.0 // indirect
 	google.golang.org/appengine v1.6.6 // indirect
-	gopkg.in/yaml.v2 v2.3.0
+	gopkg.in/yaml.v2 v2.4.0
 	gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776 // indirect
 	k8s.io/api v0.17.12-rc.0
 	k8s.io/apiextensions-apiserver v0.17.11 // indirect
