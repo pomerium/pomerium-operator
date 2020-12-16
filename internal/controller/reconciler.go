@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"reflect"
+	"regexp"
 	"strings"
 
 	"github.com/pomerium/pomerium-operator/internal/configmanager"
@@ -25,11 +26,12 @@ var logger = log.L.WithValues("component", "reconciler")
 // Reconciler implements a Kubernetes reconciler for either a Service or Ingress resources.  Use NewReconciler() to initialize.
 type Reconciler struct {
 	client.Client
-	controllerAnnotation string
-	controllerClass      string
-	kind                 runtime.Object
-	scheme               *runtime.Scheme
-	configManager        *configmanager.ConfigManager
+	controllerAnnotation  string
+	controllerClass       string
+	controllerClassRegExp *regexp.Regexp
+	kind                  runtime.Object
+	scheme                *runtime.Scheme
+	configManager         *configmanager.ConfigManager
 }
 
 // NewReconciler returns a new Reconciler for obj type Objects.
@@ -40,9 +42,12 @@ type Reconciler struct {
 func NewReconciler(obj runtime.Object, controllerClass string, configManager *configmanager.ConfigManager) *Reconciler {
 	r := &Reconciler{}
 	r.kind = obj
-	r.controllerClass = controllerClass
 	r.scheme = scheme.Scheme
 	r.configManager = configManager
+	r.controllerClass = controllerClass
+	if strings.HasPrefix(controllerClass, "/") && strings.HasSuffix(controllerClass, "/") {
+		r.controllerClassRegExp = regexp.MustCompile(controllerClass[1 : len(controllerClass)-1])
+	}
 
 	gkv, err := apiutil.GVKForObject(obj, scheme.Scheme)
 	if err != nil {
@@ -125,5 +130,13 @@ func (r *Reconciler) newKind() runtime.Object {
 func (r *Reconciler) ControllerClassMatch(meta metav1.Object) bool {
 	annotations := meta.GetAnnotations()
 	class, exists := annotations[r.controllerAnnotation]
-	return (!exists) || (exists && class == r.controllerClass)
+	if !exists {
+		return true
+	}
+
+	if r.controllerClassRegExp != nil {
+		return r.controllerClassRegExp.MatchString(class)
+	}
+
+	return r.controllerClass == class
 }
