@@ -18,7 +18,7 @@ jobs:
           - amd64
     steps:
       - name: Check out code
-        uses: actions/checkout@v2.3.3
+        uses: actions/checkout@v2.3.4
 
       - name: Install go-task
         run: curl -sL https://taskfile.dev/install.sh | sh
@@ -41,7 +41,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
-        uses: actions/checkout@v2.3.3
+        uses: actions/checkout@v2.3.4
 
       - name: Get tag name
         id: tagName
