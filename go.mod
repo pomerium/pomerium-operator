@@ -6,7 +6,7 @@ require (
 	github.com/Azure/go-autorest/autorest v0.9.6 // indirect
 	github.com/evanphx/json-patch v4.9.0+incompatible // indirect
 	github.com/ghodss/yaml v1.0.0
-	github.com/go-logr/logr v0.1.0
+	github.com/go-logr/logr v0.4.0
 	github.com/go-logr/zapr v0.1.1
 	github.com/gogo/protobuf v1.3.1 // indirect
 	github.com/google/go-cmp v0.5.4
