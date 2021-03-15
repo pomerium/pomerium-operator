@@ -7,7 +7,7 @@ require (
 	github.com/evanphx/json-patch v4.9.0+incompatible // indirect
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-logr/logr v0.1.0
-	github.com/go-logr/zapr v0.1.1
+	github.com/go-logr/zapr v0.4.0
 	github.com/gogo/protobuf v1.3.1 // indirect
 	github.com/google/go-cmp v0.5.4
 	github.com/google/gofuzz v1.2.0 // indirect
