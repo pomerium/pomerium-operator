@@ -21,6 +21,7 @@ import (
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
+	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
 )
 
 var (
@@ -98,7 +99,7 @@ var rootCmd = &cobra.Command{
 			return err
 		}
 
-		if err := o.Start(); err != nil {
+		if err := o.Start(signals.SetupSignalHandler()); err != nil {
 			logger.Error(err, "operator failed to start.  exiting")
 			return err
 		}

@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 
 	"github.com/stretchr/testify/assert"
 	networkingv1beta1 "k8s.io/api/extensions/v1beta1"
@@ -17,19 +16,32 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/cache"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
+	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
-func newFakeClient(cache cache.Cache, config *rest.Config, options client.Options) (client.Client, error) {
-	return fake.NewFakeClientWithScheme(options.Scheme), nil
+type fakeClientBuilder struct {
+	objs []client.Object
 }
+
+func (f *fakeClientBuilder) Build(cache cache.Cache, config *rest.Config, options client.Options) (client.Client, error) {
+	return fake.NewClientBuilder().WithObjects(f.objs...).Build(), nil
+}
+
+func (f *fakeClientBuilder) WithUncached(objs ...client.Object) manager.ClientBuilder {
+	f.objs = objs
+	return f
+}
+
+var clientBuilder = &fakeClientBuilder{}
+
 func newFakeRestMapper(c *rest.Config) (meta.RESTMapper, error) {
 	return testrestmapper.TestOnlyStaticRESTMapper(scheme.Scheme), nil
 }
 
 type fakeReconciler struct{}
 
-func (f *fakeReconciler) Reconcile(req reconcile.Request) (reconcile.Result, error) {
+func (f *fakeReconciler) Reconcile(_ context.Context, _ reconcile.Request) (reconcile.Result, error) {
 	return reconcile.Result{}, nil
 }
 
@@ -37,7 +49,7 @@ func Test_NewOperator(t *testing.T) {
 
 	o, err := NewOperator(Options{
 		NameSpace:          "test",
-		Client:             newFakeClient,
+		Client:             clientBuilder,
 		KubeConfig:         &rest.Config{},
 		MapperProvider:     newFakeRestMapper,
 		MetricsBindAddress: "0",
@@ -51,7 +63,7 @@ func Test_NewOperator(t *testing.T) {
 
 	_, err = NewOperator(Options{
 		NameSpace: "test",
-		Client:    newFakeClient,
+		Client:    clientBuilder,
 	})
 	assert.Error(t, err)
 }
@@ -60,7 +72,7 @@ func Test_CreateController(t *testing.T) {
 
 	o, err := NewOperator(Options{
 		NameSpace:          "test",
-		Client:             newFakeClient,
+		Client:             clientBuilder,
 		KubeConfig:         &rest.Config{},
 		MapperProvider:     newFakeRestMapper,
 		MetricsBindAddress: "0",
@@ -70,7 +82,7 @@ func Test_CreateController(t *testing.T) {
 
 	tests := []struct {
 		name string
-		obj  runtime.Object
+		obj  client.Object
 		rec  reconcile.Reconciler
 	}{
 		{name: "test-ingress", obj: &networkingv1beta1.Ingress{}, rec: &fakeReconciler{}},
@@ -91,24 +103,24 @@ type fakeRunnable struct {
 	wg          *sync.WaitGroup
 }
 
-func (f *fakeRunnable) Start(stopCh <-chan struct{}) error {
+func (f *fakeRunnable) Start(ctx context.Context) error {
 	defer f.wg.Done()
 	f.startCalled = true
-	<-stopCh
+	<-ctx.Done()
 	f.stopCalled = true
 	return nil
 }
 
 func Test_StartController(t *testing.T) {
 
-	stopCh := make(chan struct{})
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	o, err := NewOperator(Options{
 		NameSpace:          "test",
-		Client:             newFakeClient,
+		Client:             clientBuilder,
 		KubeConfig:         &rest.Config{},
 		MapperProvider:     newFakeRestMapper,
 		MetricsBindAddress: "0",
-		StopCh:             stopCh,
 	})
 	if !assert.NoError(t, err) {
 		return
@@ -124,11 +136,11 @@ func Test_StartController(t *testing.T) {
 	go func() {
 		defer wg.Done()
 
-		err = o.Start()
+		err = o.Start(ctx)
 		assert.NoError(t, err)
 	}()
 
-	close(stopCh)
+	cancel()
 	wg.Wait()
 
 	// Make sure runnable was stopped

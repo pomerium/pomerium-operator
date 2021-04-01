@@ -239,15 +239,15 @@ func Test_SaveLoop(t *testing.T) {
 	cm := NewConfigManager("test", "pomerium", newMockClient(t), time.Nanosecond*1)
 	cm.Set(newIngressResourceIdentifier("test"), []pomeriumconfig.Policy{{To: "foo", From: "bar"}})
 
-	stopCh := make(chan struct{})
+	ctx, cancel := context.WithCancel(context.Background())
 	wg := &sync.WaitGroup{}
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		cm.Start(stopCh) //nolint: errcheck
+		cm.Start(ctx) //nolint: errcheck
 	}()
 
-	close(stopCh)
+	cancel()
 	wg.Wait()
 	persistedOpts, err := cm.GetPersistedConfig()
 	assert.NoError(t, err)
