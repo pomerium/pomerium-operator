@@ -187,10 +187,10 @@ func (c *ConfigManager) GetPersistedConfig() (options pomeriumconfig.Options, er
 // Start implements manager.Runnable
 //
 //begins the periodic save loop to persist in-memory configuration to the API
-func (c *ConfigManager) Start(stopCh <-chan struct{}) error {
+func (c *ConfigManager) Start(ctx context.Context) error {
 	for {
 		select {
-		case <-stopCh:
+		case <-ctx.Done():
 			c.loopSave()
 			return nil
 		case <-c.settleTicker.C:

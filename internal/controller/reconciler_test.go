@@ -21,6 +21,7 @@ import (
 
 	"github.com/pomerium/pomerium-operator/internal/configmanager"
 	"github.com/stretchr/testify/assert"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 func Test_NewReconciler(t *testing.T) {
@@ -119,7 +120,7 @@ func Test_Reconcile(t *testing.T) {
 			err := r.InjectClient(c)
 			assert.NoError(t, err, "failed to inject client")
 
-			_, err = r.Reconcile(tt.reconcileRequest)
+			_, err = r.Reconcile(context.Background(), tt.reconcileRequest)
 			assert.NoError(t, err)
 			// assert.True(t, false)
 
@@ -175,7 +176,7 @@ func Test_Reconcile_2(t *testing.T) {
 	}
 	tests := []struct {
 		name string
-		obj  runtime.Object
+		obj  client.Object
 	}{
 		{
 			name: "add-ingress",
@@ -248,7 +249,7 @@ func Test_Reconcile_2(t *testing.T) {
 			assert.NoError(t, err)
 
 			// Reconcile without object
-			_, err = r.Reconcile(reconcile.Request{NamespacedName: objNameSpacedName})
+			_, err = r.Reconcile(context.Background(), reconcile.Request{NamespacedName: objNameSpacedName})
 			assert.NoError(t, err)
 			err = cm.Save()
 			assert.NoError(t, err, "failed to save config")
@@ -259,7 +260,7 @@ func Test_Reconcile_2(t *testing.T) {
 			// Reconcile with object
 			err = c.Create(context.Background(), tt.obj)
 			assert.NoError(t, err, "failed to create object")
-			_, err = r.Reconcile(reconcile.Request{NamespacedName: objNameSpacedName})
+			_, err = r.Reconcile(context.Background(), reconcile.Request{NamespacedName: objNameSpacedName})
 			assert.NoError(t, err)
 			err = cm.Save()
 			assert.NoError(t, err, "failed to save config")
@@ -270,7 +271,7 @@ func Test_Reconcile_2(t *testing.T) {
 			// Reconcile a delete
 			err = c.Delete(context.Background(), tt.obj)
 			assert.NoError(t, err, "failed to delete object")
-			_, err = r.Reconcile(reconcile.Request{NamespacedName: objNameSpacedName})
+			_, err = r.Reconcile(context.Background(), reconcile.Request{NamespacedName: objNameSpacedName})
 			assert.NoError(t, err)
 			err = cm.Save()
 			assert.NoError(t, err, "failed to save config")

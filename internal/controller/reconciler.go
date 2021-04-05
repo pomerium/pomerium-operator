@@ -67,7 +67,7 @@ func (r *Reconciler) InjectClient(c client.Client) error {
 }
 
 // Reconcile implements the Reconciler interface and conducts a reconcile loop on a given request.  This is typically called by a controller-manager like that found inside an Operator.
-func (r *Reconciler) Reconcile(req reconcile.Request) (reconcile.Result, error) {
+func (r *Reconciler) Reconcile(ctx context.Context, req reconcile.Request) (reconcile.Result, error) {
 	logger.V(1).Info("notified of change to resource", "resource", req.NamespacedName)
 
 	obj := r.newKind()
@@ -77,7 +77,7 @@ func (r *Reconciler) Reconcile(req reconcile.Request) (reconcile.Result, error) 
 		GVK: objKind.GroupVersionKind(), NamespacedName: objName,
 	}
 
-	if err := r.Get(context.Background(), req.NamespacedName, obj); err != nil {
+	if err := r.Get(ctx, req.NamespacedName, obj); err != nil {
 		logger.V(1).Info("resource deleted", "resource", resource)
 		r.RemoveRoute(resource)
 	} else {
@@ -121,9 +121,9 @@ func (r *Reconciler) RemoveRoute(resource configmanager.ResourceIdentifier) {
 	}
 }
 
-func (r *Reconciler) newKind() runtime.Object {
+func (r *Reconciler) newKind() client.Object {
 	k := reflect.ValueOf(r.kind)
-	return k.Interface().(runtime.Object)
+	return k.Interface().(client.Object)
 }
 
 // ControllerClassMatch determines if an Object matches the controllerClass of the Reconciler or has no controllerClass

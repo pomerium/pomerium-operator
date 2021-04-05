@@ -1,15 +1,15 @@
 package operator
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/pomerium/pomerium-operator/internal/log"
 	"k8s.io/apimachinery/pkg/api/meta"
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
-	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
@@ -22,7 +22,7 @@ type Options struct {
 	ServiceClass            string
 	IngressClass            string
 	Secret                  string
-	Client                  manager.NewClientFunc
+	Client                  manager.ClientBuilder
 	KubeConfig              *rest.Config
 	MapperProvider          func(*rest.Config) (meta.RESTMapper, error)
 	MetricsBindAddress      string
@@ -30,17 +30,14 @@ type Options struct {
 	LeaderElection          bool
 	LeaderElectionID        string
 	LeaderElectionNamespace string
-	StopCh                  <-chan struct{}
 }
 
 // Operator is the high level wrapper around a manager and the group of controllers that represents the primary functionality of pomerium-operator.  Use NewOperator() to initialize.
 //
 // Operator supports multiple Controller/Reconciler instances to allow for multiple object type recinciliation under a single controller-manager.
 type Operator struct {
-	opts    Options
-	mgr     manager.Manager
-	builder *builder.Builder
-	stopCh  <-chan struct{}
+	opts Options
+	mgr  manager.Manager
 }
 
 // NewOperator returns a new instance of an Operator, configured according to an Options struct.  The operator will have an initialized but empty Manager with no controllers.
@@ -53,7 +50,7 @@ func NewOperator(opts Options) (*Operator, error) {
 		LeaderElection:          opts.LeaderElection,
 		LeaderElectionNamespace: opts.LeaderElectionNamespace,
 		LeaderElectionID:        opts.LeaderElectionID,
-		NewClient:               opts.Client,
+		ClientBuilder:           opts.Client,
 		MapperProvider:          opts.MapperProvider,
 		MetricsBindAddress:      opts.MetricsBindAddress,
 		HealthProbeBindAddress:  opts.HealthAddress,
@@ -78,27 +75,20 @@ func NewOperator(opts Options) (*Operator, error) {
 		return nil, err
 	}
 
-	operator := Operator{opts: opts, mgr: mgr, builder: builder.ControllerManagedBy(mgr), stopCh: opts.StopCh}
+	operator := Operator{opts: opts, mgr: mgr}
 
 	return &operator, nil
 }
 
 // Start calls Start() on the underlying controller-manager.  This begins the event handling loops on the controllers associated with the Operator instance.
-func (o *Operator) Start() error {
+func (o *Operator) Start(ctx context.Context) error {
 	logger.Info("starting manager")
 
 	if o.opts.LeaderElection {
 		logger.Info("waiting for leadership")
 	}
 
-	var stopCh <-chan struct{}
-	if o.stopCh == nil {
-		stopCh = signals.SetupSignalHandler()
-	} else {
-		stopCh = o.stopCh
-	}
-
-	if err := o.mgr.Start(stopCh); err != nil {
+	if err := o.mgr.Start(ctx); err != nil {
 		logger.Error(err, "could not start manager")
 		return err
 	}
@@ -111,9 +101,10 @@ func (o *Operator) Add(f manager.Runnable) error {
 }
 
 // CreateController registers a new Reconciler with the Operator and associates it with an object type to handle events for.
-func (o *Operator) CreateController(reconciler reconcile.Reconciler, name string, object runtime.Object) error {
+func (o *Operator) CreateController(reconciler reconcile.Reconciler, name string, object client.Object) error {
 	log.L.V(1).Info("adding controller", "name", name, "kind", object.GetObjectKind().GroupVersionKind().Kind)
-	err := o.builder.For(object).Named(name).Complete(reconciler)
+	bld := builder.ControllerManagedBy(o.mgr)
+	err := bld.For(object).Named(name).Complete(reconciler)
 	if err != nil {
 		logger.Error(err, "failed to create controller", "name", name, "kind", object.GetObjectKind().GroupVersionKind().String())
 		return err
