@@ -1,4 +1,4 @@
-name: Default
+name: Test
 on:
   push:
     branches:
@@ -13,10 +13,10 @@ jobs:
     env:
       CC_TEST_REPORTER_ID: e00c0ed949f5e40a348d609012867727924fc02dc8257004e76e54726fc55e60
     container:
-      image: "golang:1.14"
+      image: "golang:latest"
     steps:
       - name: Check out code
-        uses: actions/checkout@v2.3.4
+        uses: actions/checkout@v2
 
       - name: Install go-task
         run: curl -sL https://taskfile.dev/install.sh | sh
@@ -45,17 +45,17 @@ jobs:
       image: golangci/golangci-lint:v1.21.0
     steps:
       - name: Check out code
-        uses: actions/checkout@v2.3.4
+        uses: actions/checkout@v2
       - name: Lint
         run: golangci-lint run
 
   build:
     runs-on: ubuntu-latest
     container:
-      image: "golang:1.14"
+      image: "golang:latest"
     steps:
       - name: Check out code
-        uses: actions/checkout@v2.3.4
+        uses: actions/checkout@v2
 
       - name: Install go-task
         run: curl -sL https://taskfile.dev/install.sh | sh
@@ -67,32 +67,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
-        uses: actions/checkout@v2.3.4
+        uses: actions/checkout@v2
 
       - name: Docker Build
         run: docker build .
-
-  publish-docker-snapshot:
-    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
-    runs-on: ubuntu-latest
-    needs:
-      - build
-      - build-docker
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v2.3.4
-
-      - name: Docker Publish - Snapshot
-        uses: zenato/docker-action@master
-        with:
-          username: ${{ secrets.DOCKERHUB_USER }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-          repository: pomerium/pomerium-operator
-
-      - name: Docker Publish - Master
-        uses: zenato/docker-action@master
-        with:
-          username: ${{ secrets.DOCKERHUB_USER }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-          repository: pomerium/pomerium-operator
-          tag: master
