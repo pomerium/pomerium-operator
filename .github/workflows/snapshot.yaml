@@ -1,0 +1,42 @@
+name: Snapshot
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  publish-docker-snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Prepare Image Metadata
+        id: metadata
+        run: |
+          IMAGE=pomerium/pomerium-operator
+          SHA_TAG=git-${GITHUB_SHA::8}
+          TAGS=${IMAGE}:master
+          TAGS=${TAGS},${IMAGE}:${SHA_TAG}
+          TS=$(date +%Y%m%d%H%M%S)
+          echo ::set-output name=tags::${TAGS}
+          echo ::set-output name=timestamp::${TS}
+          echo ::set-output name=name::pomerium-operator
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USER }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Docker Publish - Master
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{ steps.metadata.outputs.tags }}
+          labels: |
+            org.opencontainers.image.created=${{ steps.metadata.outputs.timestamp }}
+            org.opencontainers.image.name=${{ steps.metadata.outputs.name }}
+            org.opencontainers.image.revision=${{ github.sha }}

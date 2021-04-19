@@ -8,7 +8,7 @@ jobs:
   release-binary:
     runs-on: ubuntu-latest
     container:
-      image: "golang:1.14"
+      image: "golang:latest"
     strategy:
       matrix:
         os:
@@ -18,7 +18,7 @@ jobs:
           - amd64
     steps:
       - name: Check out code
-        uses: actions/checkout@v2.3.4
+        uses: actions/checkout@v2
 
       - name: Install go-task
         run: curl -sL https://taskfile.dev/install.sh | sh
@@ -41,28 +41,37 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
-        uses: actions/checkout@v2.3.4
+        uses: actions/checkout@v2
 
-      - name: Get tag name
-        id: tagName
+      - name: Prepare Image Metadata
+        id: metadata
         run: |
           TAG=$(git describe --tags --exact-match)
+          TS=$(date +%Y%m%d%H%M%S)
           echo ::set-output name=tag::${TAG}
+          echo ::set-output name=image::pomerium/pomerium-operator
+          echo ::set-output name=timestamp::${TS}
+          echo ::set-output name=name::pomerium-operator
 
-      - name: Docker Publish - Release
-        uses: zenato/docker-action@master
-        continue-on-error: true
+      - uses: azure/docker-login@v1
         with:
           username: ${{ secrets.DOCKERHUB_USER }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-          repository: pomerium/pomerium-operator
-          tag: ${{ steps.tagName.outputs.tag }}
+
+      - name: Docker Publish
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{ steps.metadata.outputs.image }}:${{ steps.metadata.outputs.tag }}
+          labels: |
+            org.opencontainers.image.created=${{ steps.metadata.outputs.timestamp }}
+            org.opencontainers.image.name=${{ steps.metadata.outputs.name }}
+            org.opencontainers.image.revision=${{ github.sha }}
 
       - name: Docker Publish - Latest
-        if: "!contains(steps.tagName.outputs.tag, 'rc')"
-        uses: zenato/docker-action@master
-        with:
-          username: ${{ secrets.DOCKERHUB_USER }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-          repository: pomerium/pomerium-operator
-          tag: latest
+        if: "!contains(steps.metadata.outputs.tag, 'rc')"
+        run: |
+          docker tag ${{ steps.metadata.outputs.image }}:${{ steps.metadata.outputs.tag }} ${{ steps.metadata.outputs.image }}:latest
+          docker push ${{ steps.metadata.outputs.image }}:latest
