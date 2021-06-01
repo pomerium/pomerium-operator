@@ -35,10 +35,10 @@ require (
 	google.golang.org/appengine v1.6.7 // indirect
 	gopkg.in/yaml.v2 v2.4.0
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
-	k8s.io/api v0.19.10-rc.0
+	k8s.io/api v0.19.11
 	k8s.io/apiextensions-apiserver v0.19.9 // indirect
-	k8s.io/apimachinery v0.19.10-rc.0
-	k8s.io/client-go v0.19.9
+	k8s.io/apimachinery v0.19.11
+	k8s.io/client-go v0.19.11
 	k8s.io/klog/v2 v2.8.0 // indirect
 	k8s.io/kube-openapi v0.0.0-20210323165736-1a6458611d18 // indirect
 	k8s.io/utils v0.0.0-20210305010621-2afb4311ab10 // indirect
