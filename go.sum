@@ -668,6 +668,8 @@ github.com/pomerium/pomerium v0.12.1 h1:beRsDA1Ya4mAlJnxfICvNiQ5J5QXCGmC7Py0lmt4
 github.com/pomerium/pomerium v0.12.1/go.mod h1:Tg/Tt7VPF0zsDWInRibU14uwuefCm2DueLPqQiI59ow=
 github.com/pomerium/pomerium v0.14.4 h1:SFjHBZfOCcjwV/+FCEYep+T0ywBmNFewfcio/pYY1w8=
 github.com/pomerium/pomerium v0.14.4/go.mod h1:dAJtjf/6ufWY3H8p3Q3mSL3fwLUf3zEaYl0hHJnkmIs=
+github.com/pomerium/pomerium v0.14.5 h1:51L8+uI3z4Ib2mtdS1667IKzNjNkT6nCB7zwpu972lM=
+github.com/pomerium/pomerium v0.14.5/go.mod h1:dAJtjf/6ufWY3H8p3Q3mSL3fwLUf3zEaYl0hHJnkmIs=
 github.com/posener/complete v1.1.1/go.mod h1:em0nMJCgc9GFtwrmVmEMR/ZL6WyhyjMBndrE9hABlRI=
 github.com/pquerna/cachecontrol v0.0.0-20171018203845-0dec1b30a021/go.mod h1:prYjPmNq4d1NPVmpShWobRqXY3q7Vp+80DqgxxUrUIA=
 github.com/pquerna/cachecontrol v0.0.0-20180517163645-1555304b9b35 h1:J9b7z+QKAmPf4YLrFg6oQUotqHQeUNWwkvo7jZp1GLU=
