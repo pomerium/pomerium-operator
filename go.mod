@@ -17,7 +17,7 @@ require (
 	github.com/googleapis/gnostic v0.5.4 // indirect
 	github.com/iancoleman/strcase v0.1.3
 	github.com/imdario/mergo v0.3.12 // indirect
-	github.com/pomerium/pomerium v0.14.4
+	github.com/pomerium/pomerium v0.14.5
 	github.com/prometheus/client_golang v1.10.0 // indirect
 	github.com/spf13/cobra v1.1.3
 	github.com/spf13/pflag v1.0.5
