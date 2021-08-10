@@ -15,7 +15,7 @@ require (
 	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/google/uuid v1.2.0 // indirect
 	github.com/googleapis/gnostic v0.5.4 // indirect
-	github.com/iancoleman/strcase v0.1.3
+	github.com/iancoleman/strcase v0.2.0
 	github.com/imdario/mergo v0.3.12 // indirect
 	github.com/pomerium/pomerium v0.14.5
 	github.com/prometheus/client_golang v1.10.0 // indirect
