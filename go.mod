@@ -21,8 +21,7 @@ require (
 	github.com/lithammer/shortuuid/v3 v3.0.6 // indirect
 	github.com/onsi/ginkgo v1.15.0 // indirect
 	github.com/onsi/gomega v1.10.5 // indirect
-	github.com/pomerium/csrf v1.7.0 // indirect
-	github.com/pomerium/pomerium v0.11.0
+	github.com/pomerium/pomerium v0.13.4
 	github.com/prometheus/client_golang v1.10.0 // indirect
 	github.com/prometheus/common v0.23.0 // indirect
 	github.com/rs/zerolog v1.21.0 // indirect
