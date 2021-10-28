@@ -28,10 +28,10 @@ require (
 	golang.org/x/term v0.0.0-20210317153231-de623e64d2a6 // indirect
 	golang.org/x/time v0.0.0-20210220033141-f8bda1e9f3ba // indirect
 	gopkg.in/yaml.v2 v2.4.0
-	k8s.io/api v0.19.14
+	k8s.io/api v0.19.16
 	k8s.io/apiextensions-apiserver v0.19.9 // indirect
-	k8s.io/apimachinery v0.19.14
-	k8s.io/client-go v0.19.14
+	k8s.io/apimachinery v0.19.16
+	k8s.io/client-go v0.19.16
 	k8s.io/klog/v2 v2.8.0 // indirect
 	k8s.io/kube-openapi v0.0.0-20210323165736-1a6458611d18 // indirect
 	k8s.io/utils v0.0.0-20210305010621-2afb4311ab10 // indirect
