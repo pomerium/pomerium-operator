@@ -25,11 +25,13 @@ We've just released a new Ingress Controller (docs [here](https://www.pomerium.c
 
 [Pomerium Ingress Controller](https://github.com/pomerium/ingress-controller) addresses shortcomings in the operator and allows Pomerium to directly handle `Ingress` resources without the need for an external/third-party ingress controller.  Additionally, the ingress controller supports Pomerium's new [policy language](https://www.pomerium.com/enterprise/reference/manage.html#pomerium-policy-language) and other features introduced in the last year or so.  
 
-As such, pomerium-operator will no longer be receiving updates.  Most practically, the operator will not be supported on Kubernetes v1.22+ due to the required upgrade to `v1/Ingress` API.
+As such, pomerium-operator will no longer be receiving updates.  Most practically, the operator will not be supported on Kubernetes v1.22+ due to the [deprecation](https://kubernetes.io/docs/reference/using-api/deprecation-guide/#ingress-v122) of the `v1beta1/Ingress` API.  
 
-While it is possible to deploy the ingress controller in an "operator compatible" manner, the new project is meant to function as a first class ingress controller and we strongly recommend migrating to the native functionality.  It provides higher performance, stronger security guarantees, lower complexity, and reduced error opportunities compared to using a third party ingress integration via forward-auth.
+While it is possible to deploy the ingress controller in an "operator compatible" manner, the new project is meant to function as a first class ingress controller and we strongly recommend migrating to the native functionality.  This provides higher performance, stronger security guarantees, lower complexity, and reduced error opportunities compared to using a third party ingress integration via forward-auth.
 
-See https://github.com/pomerium/pomerium-helm/tree/master/charts/pomerium#2500-1 for upgrade steps if you'd like to continue using forward-auth and a separate proxy.  Beginning in Helm chart `v25.0.0`, the operator has been replaced with Pomerium Ingress Controller.
+See https://github.com/pomerium/pomerium-helm/tree/master/charts/pomerium#2500-1 for upgrade steps if you'd like to continue using forward-auth and a separate proxy.  
+
+Note: Beginning in Helm chart `v25.0.0`, the operator deployment has been replaced with Pomerium Ingress Controller.
 # About
 
 An operator for running Pomerium on a Kubernetes cluster.
