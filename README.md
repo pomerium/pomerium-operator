@@ -7,7 +7,7 @@
 [![codecov](https://img.shields.io/codecov/c/github/pomerium/pomerium-operator.svg?style=flat)](https://codecov.io/gh/pomerium/pomerium-operator)
 ![Docker Pulls](https://img.shields.io/docker/pulls/pomerium/pomerium-operator)
 
-- [Deprecation Notice](#deprecation-notice)
+- [:warning: Deprecation Notice](#warning-deprecation-notice)
 - [About](#about)
   - [Initial discussion](#initial-discussion)
 - [Installing](#installing)
@@ -19,7 +19,7 @@
   - [Building](#building)
 - [Roadmap](#roadmap)
 
-# Deprecation Notice
+# :warning: Deprecation Notice
 
 We've just released a new Ingress Controller (docs [here](https://www.pomerium.com/docs/k8s/ingress.html)), which supersedes the operator.  
 
