@@ -29,7 +29,7 @@ As such, pomerium-operator will no longer be receiving updates.  Most practicall
 
 While it is possible to deploy the ingress controller in an "operator compatible" manner, the new project is meant to function as a first class ingress controller and we strongly recommend migrating to the native functionality.  This provides higher performance, stronger security guarantees, lower complexity, and reduced error opportunities compared to using a third party ingress integration via forward-auth.
 
-See https://github.com/pomerium/pomerium-helm/tree/master/charts/pomerium#2500-1 for upgrade steps if you'd like to continue using forward-auth and a separate proxy.  
+See https://github.com/pomerium/pomerium-helm/tree/master/charts/pomerium#2500-1 for upgrade steps if you'd like to continue using forward-auth and a separate proxy.
 
 Note: Beginning in Helm chart `v25.0.0`, the operator deployment has been replaced with Pomerium Ingress Controller.
 # About
