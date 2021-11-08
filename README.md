@@ -21,7 +21,7 @@
 
 # :warning: Deprecation Notice
 
-We've just released a new Ingress Controller (docs [here](https://www.pomerium.com/docs/k8s/ingress.html)), which supersedes the operator.  
+We've just released a new Ingress Controller (docs [here](https://www.pomerium.com/docs/k8s/ingress.html)), which supersedes the operator.
 
 [Pomerium Ingress Controller](https://github.com/pomerium/ingress-controller) addresses shortcomings in the operator and allows Pomerium to directly handle `Ingress` resources without the need for an external/third-party ingress controller.  Additionally, the ingress controller supports Pomerium's new [policy language](https://www.pomerium.com/enterprise/reference/manage.html#pomerium-policy-language) and other features introduced in the last year or so.  
 
