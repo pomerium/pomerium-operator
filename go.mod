@@ -10,12 +10,13 @@ require (
 	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/googleapis/gnostic v0.5.4 // indirect
 	github.com/iancoleman/strcase v0.2.0
-	github.com/pomerium/pomerium v0.15.6
+	github.com/pomerium/pomerium v0.16.4
 	github.com/spf13/cobra v1.2.1
 	github.com/spf13/pflag v1.0.5
-	github.com/spf13/viper v1.9.0
+	github.com/spf13/viper v1.10.1
 	github.com/stretchr/testify v1.7.0
 	go.uber.org/zap v1.19.1
+	golang.org/x/term v0.0.0-20210615171337-6886f2dfbf5b // indirect
 	gopkg.in/yaml.v2 v2.4.0
 	k8s.io/api v0.20.6
 	k8s.io/apiextensions-apiserver v0.19.9 // indirect
